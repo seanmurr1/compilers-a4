@@ -476,6 +476,9 @@ Operand HighLevelCodegen::get_struct_offset(Node *struct_node, const std::string
   // Find field offset
   unsigned offset;
   std::shared_ptr<Type> struct_type = struct_node->get_type();
+  if (struct_type->is_array() || struct_type->is_pointer()) {
+    struct_type = struct_type->get_base_type();
+  }
   for (unsigned i = 0; i < struct_type->get_num_members(); i++) {
     const Member &mem = struct_type->get_member(i);
     if (mem.get_name() == field_name) {
