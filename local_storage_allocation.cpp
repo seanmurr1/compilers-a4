@@ -34,17 +34,17 @@ void LocalStorageAllocation::process_declarator(Node *declarator) {
       std::string var_name = var->get_str();
       Symbol *sym = declarator->get_symbol();
       std::shared_ptr<Type> type = var->get_type();
-
+      printf("allocating...\n");
       if ((type->is_integral() || type->is_pointer()) && !sym->requires_storage()) {
         // Set vreg if var is integral or a pointer, and its address is never taken
         int vreg = get_next_vreg();
         sym->set_vreg(vreg);
-        printf("/* variable \'%s\' allocated vreg %d */", var_name, vreg);
+        printf("/* variable \'%s\' allocated vreg %d */\n", var_name, vreg);
       } else {
         // Allocate offset in functions local storage area
         unsigned offset = m_storage_calc.add_field(type);
         sym->set_offset(offset);
-        printf("/* variable \'%s\' allocated %d bytes of storage at offset %d */", type->get_storage_size(), offset);
+        printf("/* variable \'%s\' allocated %d bytes of storage at offset %d */\n", type->get_storage_size(), offset);
       }
       return;
   }

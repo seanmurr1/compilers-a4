@@ -142,8 +142,10 @@ void Context::collect_ast_string_constants(Node *n, ModuleCollector *module_coll
 void Context::highlevel_codegen(ModuleCollector *module_collector) {
   // TODO: do anything that's necessary prior to high-level code gen
   //       (e.g., storage allocation)
+  printf("Visitng ast for storage alloc\n");
   LocalStorageAllocation storage_allocation;
   storage_allocation.visit(m_ast);
+  printf("storage alloc done\n");
 
   // TODO: find all of the string constants in the AST
   //       and call the ModuleCollector's collect_string_constant
