@@ -12,7 +12,6 @@ private:
   int m_next_label_num;
   std::string m_return_label_name; // name of the label that return instructions should target
   std::shared_ptr<InstructionSequence> m_hl_iseq;
-
   int m_next_temp_vreg;
 
 public:
@@ -44,14 +43,12 @@ public:
 
 private:
   std::string next_label();
-  // TODO: additional private member functions
 
   void generate_assignment(Node *n);
   void generate_non_assignment(Node *n, int binary_op);
-
   void process_parameter(Node *declarator, int register_index);
 
   Operand get_struct_offset(Node *struct_node, const std::string &field_name);
-
+  
   int next_temp_vreg();
 };

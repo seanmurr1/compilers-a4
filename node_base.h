@@ -37,6 +37,7 @@ private:
   std::shared_ptr<Symbol> m_symbol;
   std::shared_ptr<Type> m_type;
 
+  // Operand associated with node
   Operand m_op;
 
   // copy ctor and assignment operator not supported

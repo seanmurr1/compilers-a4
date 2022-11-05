@@ -82,8 +82,6 @@ void NodeBase::set_operand(Operand op) {
 
 // Get operand associated with node
 Operand NodeBase::get_operand() const {
-  //assert(has_symbol());
-
   if (has_symbol() && m_symbol->requires_storage()) {
     return m_op.to_memref();
   } else {
@@ -91,9 +89,10 @@ Operand NodeBase::get_operand() const {
   }
 }
 
+// Get address of operand associated with node
+// This just means do not dereference if it 
+// requires storage.
 Operand NodeBase::get_address_of_operand() const {
-  //assert(has_symbol());
-  //assert(m_symbol->requires_storage());
   return m_op;
 }
 

@@ -279,7 +279,6 @@ void SemanticAnalysis::process_function_parameters(Node *parameter_list, std::ve
     // Visit base type
     visit(parameter->get_kid(0));
     std::shared_ptr<Type> base_type = parameter->get_kid(0)->get_type();
-    //std::shared_ptr<Type> base_type = parameter->get_type();
     // Process declarators
     process_declarator(declared_parameters, parameter->get_kid(1), base_type);
   }
@@ -436,7 +435,6 @@ bool SemanticAnalysis::is_relational_or_logical_op(int tag) {
 
 // Checks if a node is a pointer dereference
 bool SemanticAnalysis::is_pointer_dereference(Node *n) {
-  //return n->get_kid(0)->get_tag() == TOK_ASTERISK && n->get_kid(1)->get_tag() == AST_VARIABLE_REF;
   return n->get_kid(0)->get_tag() == TOK_ASTERISK;
 }
 

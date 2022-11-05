@@ -31,10 +31,7 @@ public:
   virtual void visit_struct_type_definition(Node *n);
 
 private:
-  // TODO: add private member functions
-
   int get_next_vreg();
-
   void process_declarator(Node *declarator);
 };
 

@@ -31,6 +31,10 @@ HighLevelCodegen::HighLevelCodegen(int next_label_num)
 HighLevelCodegen::~HighLevelCodegen() {
 }
 
+/**
+ * Process function parameter, generating code to move it from 
+ * argument register to parameter's vreg.
+ **/
 void HighLevelCodegen::process_parameter(Node *declarator, int register_index) {
   int tag = declarator->get_tag();
   switch (tag) {
@@ -42,9 +46,7 @@ void HighLevelCodegen::process_parameter(Node *declarator, int register_index) {
       return;
     case AST_NAMED_DECLARATOR:
       Node *var = declarator->get_kid(0);
-      //visit_variable_ref(var);
       visit_variable_ref(declarator);
-      //Operand var_op = var->get_operand();
       Operand var_op = declarator->get_operand();
       Operand arg_register(Operand::VREG, register_index);
       HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, var->get_type());
@@ -54,12 +56,18 @@ void HighLevelCodegen::process_parameter(Node *declarator, int register_index) {
 
 }
 
+/**
+ * Get next temp vreg.
+ **/
 int HighLevelCodegen::next_temp_vreg() {
   int temp_vreg = m_next_temp_vreg;
   m_next_temp_vreg++;
   return temp_vreg;
 }
 
+/**
+ * Generate code for a function.
+ **/
 void HighLevelCodegen::visit_function_definition(Node *n) {
   // generate the name of the label that return instructions should target
   std::string fn_name = n->get_kid(1)->get_str();
@@ -67,7 +75,10 @@ void HighLevelCodegen::visit_function_definition(Node *n) {
 
   std::shared_ptr<Symbol> fn_sym = n->get_symbol();
 
+  // Function storage
   unsigned total_local_storage = fn_sym->get_offset();
+  
+  // Starting temp vreg #
   m_next_temp_vreg = fn_sym->get_vreg();
 
   m_hl_iseq->append(new Instruction(HINS_enter, Operand(Operand::IMM_IVAL, total_local_storage)));
@@ -77,8 +88,6 @@ void HighLevelCodegen::visit_function_definition(Node *n) {
   int register_index = 1;
   for (auto i = parameters->cbegin(); i != parameters->cend(); i++) {
     Node *declarator = (*i)->get_kid(1);
-    // Recurse down until AST_NAMED_DECLARATOR and get symbol there
-    // Then get vreg from symbol
     process_parameter(declarator, register_index);
     register_index++;
   }
@@ -91,22 +100,26 @@ void HighLevelCodegen::visit_function_definition(Node *n) {
   m_hl_iseq->append(new Instruction(HINS_ret));
 }
 
+/**
+ * Generate code for expression. Update temp vreg numbers.
+ **/
 void HighLevelCodegen::visit_expression_statement(Node *n) {
-  // TODO: implement
-
   int save = m_next_temp_vreg;
 
   visit(n->get_kid(0));
   n->set_operand(n->get_kid(0)->get_operand());
 
+  // Reset temp vregs
   m_next_temp_vreg = save;
 }
 
+// Visit return statement, generating code to jump to return label.
 void HighLevelCodegen::visit_return_statement(Node *n) {
   // jump to the return label
   m_hl_iseq->append(new Instruction(HINS_jmp, Operand(Operand::LABEL, m_return_label_name)));
 }
 
+// Generate code to evaluate return expression.
 void HighLevelCodegen::visit_return_expression_statement(Node *n) {
   Node *expr = n->get_kid(0);
 
@@ -121,6 +134,9 @@ void HighLevelCodegen::visit_return_expression_statement(Node *n) {
   visit_return_statement(n);
 }
 
+/**
+ * Generate code for while statement.
+ **/
 void HighLevelCodegen::visit_while_statement(Node *n) {
   std::string body_label = next_label();
   std::string cond_label = next_label();
@@ -136,6 +152,9 @@ void HighLevelCodegen::visit_while_statement(Node *n) {
   m_hl_iseq->append(new Instruction(HINS_cjmp_t, condition->get_operand(), Operand(Operand::LABEL, body_label)));
 }
 
+/**
+ * Generate code for do-while statement.
+ **/
 void HighLevelCodegen::visit_do_while_statement(Node *n) {
   std::string loop_label = next_label();
 
@@ -148,6 +167,9 @@ void HighLevelCodegen::visit_do_while_statement(Node *n) {
   m_hl_iseq->append(new Instruction(HINS_cjmp_t, condition->get_operand(), Operand(Operand::LABEL, loop_label)));
 }
 
+/**
+ * Generate code for "for" statement.
+ **/
 void HighLevelCodegen::visit_for_statement(Node *n) {
   Node *loop_var_initialize = n->get_kid(0);
   Node *loop_cond = n->get_kid(1);
@@ -167,6 +189,9 @@ void HighLevelCodegen::visit_for_statement(Node *n) {
   m_hl_iseq->append(new Instruction(HINS_cjmp_t, loop_cond->get_operand(), Operand(Operand::LABEL, body_label)));
 }
 
+/**
+ * Generate code for if statement.
+ **/
 void HighLevelCodegen::visit_if_statement(Node *n) {
   std::string after_if_label = next_label();
 
@@ -179,6 +204,9 @@ void HighLevelCodegen::visit_if_statement(Node *n) {
   m_hl_iseq->define_label(after_if_label);
 }
 
+/**
+ * Generate code for if-else statement.
+ **/
 void HighLevelCodegen::visit_if_else_statement(Node *n) {
   std::string post_label = next_label();
   std::string else_label = next_label();
@@ -196,6 +224,9 @@ void HighLevelCodegen::visit_if_else_statement(Node *n) {
   m_hl_iseq->define_label(post_label);
 }
 
+/**
+ * Generate code for assignment operation.
+ **/
 void HighLevelCodegen::generate_assignment(Node *n) {
   Operand left = n->get_kid(1)->get_operand();
   Operand right = n->get_kid(2)->get_operand();
@@ -203,20 +234,21 @@ void HighLevelCodegen::generate_assignment(Node *n) {
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_kid(1)->get_type());
 
   m_hl_iseq->append(new Instruction(mov_opcode, left, right));
-  n->set_operand(left); // TODO?
+  n->set_operand(left);
 }
 
+/**
+ * Generate code for non-assignment binary operation.
+ **/
 void HighLevelCodegen::generate_non_assignment(Node *n, int binary_op) {
   Operand left = n->get_kid(1)->get_operand();
   Operand right = n->get_kid(2)->get_operand();
-
   // left & right should have same types (since promotions already occurred)
 
   int vreg = next_temp_vreg();
   Operand dest(Operand::VREG, vreg);
 
   HighLevelOpcode opcode;
-
   switch (binary_op) {
     case TOK_PLUS:
       opcode = HINS_add_b;
@@ -252,13 +284,13 @@ void HighLevelCodegen::generate_non_assignment(Node *n, int binary_op) {
       opcode = HINS_cmpneq_b;
       break;
     case TOK_LOGICAL_OR:
-      // TODO
+      opcode = HINS_or_b;
       break;
     case TOK_LOGICAL_AND:
-      // TODO
+      opcode = HINS_and_b;
       break;
     default:
-      // TODO
+      // Unreachable
       break;
   }
 
@@ -296,8 +328,8 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
     visit(arg);
     Operand arg_op = arg->get_operand();
     Operand arg_reg = Operand(Operand::VREG, arg_reg_index);
-    HighLevelOpcode mov_op = get_opcode(HINS_mov_b, arg->get_type());
-    m_hl_iseq->append(new Instruction(mov_op, arg_reg, arg_op));
+    HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, arg->get_type());
+    m_hl_iseq->append(new Instruction(mov_opcode, arg_reg, arg_op));
     arg_reg_index++;
   }
 
@@ -314,7 +346,7 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
 }
 
 /**
- * References array index. Converts index to quad if needed. Multiples raw
+ * References array index. Converts index to quad if needed. Multiplies raw
  * index by size of data of array and accessed memory there.
  **/
 void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
@@ -341,7 +373,7 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
     } else if (basic_type == BasicTypeKind::INT) {
       convert_opcode = HINS_sconv_lq;
     } else {
-      // ERROR:
+      RuntimeError::raise("Attempt to index array/pointer with %s", index->get_type()->as_str().c_str());
     }
     // Upgrade index to LONG
     m_hl_iseq->append(new Instruction(convert_opcode, quad_index, raw_index));
@@ -361,14 +393,7 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
   Operand arr_shifted = Operand(Operand::VREG, vreg);
   m_hl_iseq->append(new Instruction(HINS_add_q, arr_shifted, arr_base, scaled_index));
 
-  // Get memory at shifted ptr
-  // vreg = next_temp_vreg();
-  // Operand accessed_el = Operand(Operand::VREG, vreg);
-  // HighLevelOpcode mov_op = get_opcode(HINS_mov_b, arr->get_type()->get_base_type());
-  // m_hl_iseq->append(new Instruction(mov_op, accessed_el, arr_shifted.to_memref()));
-
-  // Annotate node
-  //n->set_operand(accessed_el);
+  // Annotate node with mem reference to shifted arr 
   n->set_operand(arr_shifted.to_memref());
 }
 
@@ -400,12 +425,9 @@ void HighLevelCodegen::visit_literal_value(Node *n) {
 
   // TODO: add logic for string constants
   
-  //LiteralValue val = n->get_literal_value();
-
   const std::string &lexeme = n->get_kid(0)->get_str();
   const Location &loc = n->get_kid(0)->get_loc();
   LiteralValue val = LiteralValue::from_int_literal(lexeme, loc);
-
 
   int vreg = next_temp_vreg();
   Operand dest(Operand::VREG, vreg);
@@ -448,29 +470,30 @@ void HighLevelCodegen::visit_unary_expression(Node *n) {
     case TOK_MINUS:
       {
       vreg = next_temp_vreg();
-      Operand negative_one = Operand(Operand::IMM_IVAL, -1);
-      Operand negator = Operand(Operand::VREG, vreg);
-      HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, arg->get_type());
-      m_hl_iseq->append(new Instruction(mov_opcode, negator, negative_one));
-      vreg = next_temp_vreg();
-      Operand negated(Operand::VREG, vreg);
-      HighLevelOpcode mul_opcode = get_opcode(HINS_mul_b, arg->get_type());
-      m_hl_iseq->append(new Instruction(mul_opcode, negated, arg_op, negator));
-      n->set_operand(negated);
+      Operand dest(Operand::VREG, vreg);
+      HighLevelOpcode neg_opcode = get_opcode(HINS_neg_b, arg->get_type());
+      m_hl_iseq->append(new Instruction(neg_opcode, dest, arg_op));
+      n->set_operand(dest);
       }
       break;
     case TOK_NOT:
-      // TODO
+      {
+      vreg = next_temp_vreg();
+      Operand dest(Operand::VREG, vreg);
+      HighLevelOpcode not_opcode = get_opcode(HINS_not_b, arg->get_type());
+      m_hl_iseq->append(new Instruction(not_opcode, dest, arg_op));
+      n->set_operand(dest);
+      }
       break;
-
     default:
+      // Unreachable
       break;
   }
-
 }
 
 /**
  * Generates operand for a struct's offset given a field name.
+ * Returns temp vreg with offset stored.
  **/
 Operand HighLevelCodegen::get_struct_offset(Node *struct_node, const std::string &field_name) {
   // Find field offset
@@ -494,7 +517,7 @@ Operand HighLevelCodegen::get_struct_offset(Node *struct_node, const std::string
 }
 
 /**
- * TODO
+ * Generate code to reference a field in a struct.
  **/
 void HighLevelCodegen::visit_field_ref_expression(Node *n) {
   Node *struct_node = n->get_kid(0);
@@ -514,26 +537,14 @@ void HighLevelCodegen::visit_field_ref_expression(Node *n) {
   n->set_operand(shifted_field.to_memref());
 }
 
-// TODO? check, this is exactly the same as above
 /**
- * TODO
+ * Generate code to indirectly reference a field in a struct.
+ * This is identical to directly referencing a field since
+ * structs always have an offset so we deal with them with mem 
+ * references anyways.
  **/
 void HighLevelCodegen::visit_indirect_field_ref_expression(Node *n) {
-  Node *struct_node = n->get_kid(0);
-  Node *field_node = n->get_kid(1);
-  const std::string &field_name = field_node->get_str();
-  // Visit struct
-  visit(struct_node);
-
-  // Get struct offset 
-  Operand offset_op = get_struct_offset(struct_node, field_name);
-  // Add offset to struct register
-  Operand struct_op = struct_node->get_address_of_operand();
-  int vreg = next_temp_vreg();
-  Operand shifted_field(Operand::VREG, vreg);
-  m_hl_iseq->append(new Instruction(HINS_add_q, shifted_field, struct_op, offset_op));
-  // Annotate node
-  n->set_operand(shifted_field.to_memref());
+  visit_field_ref_expression(n);
 }
 
 /**
@@ -543,5 +554,3 @@ std::string HighLevelCodegen::next_label() {
   std::string label = ".L" + std::to_string(m_next_label_num++);
   return label;
 }
-
-// TODO: additional private member functions
