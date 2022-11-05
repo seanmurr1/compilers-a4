@@ -135,7 +135,7 @@ void SemanticAnalysis::process_declarator(std::vector<Node *> &vars, Node *decla
     case AST_NAMED_DECLARATOR:
       { 
         declarator->get_kid(0)->set_type(base_type);
-        vars.push_back(declarator->get_kid(0));
+        vars.push_back(declarator);
       }
       break;
     default:
@@ -260,10 +260,11 @@ void SemanticAnalysis::visit_basic_type(Node *n) {
  **/
 void SemanticAnalysis::add_vars_to_sym_table(std::vector<Node *> &vars) {
   for (auto i = vars.cbegin(); i != vars.cend(); i++) {
-    Node *var = *i;
+    Node *var_parent = *i;
+    Node *var = var_parent->get_kid(0);
     if (m_cur_symtab->has_symbol_local(var->get_str())) SemanticError::raise(var->get_loc(), "Name already defined");
     Symbol *sym = m_cur_symtab->define(SymbolKind::VARIABLE, var->get_str(), var->get_type());
-    var->set_symbol(sym);
+    var_parent->set_symbol(sym);
   }
 }
 
