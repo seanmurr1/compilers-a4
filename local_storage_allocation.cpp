@@ -41,7 +41,9 @@ void LocalStorageAllocation::process_declarator(Node *declarator) {
         printf("/* variable \'%s\' allocated vreg %d */\n", var_name.c_str(), vreg);
       } else {
         // Allocate offset in functions local storage area
+        printf("Adding field, before: %u\n", m_storage_calc.get_size());
         unsigned offset = m_storage_calc.add_field(type);
+        printf("Adding field, after: %u\n", m_storage_calc.get_size());
         sym->set_offset(offset);
         printf("/* variable \'%s\' allocated %u bytes of storage at offset %u */\n", var_name.c_str(), type->get_storage_size(), offset);
       }
@@ -108,5 +110,3 @@ void LocalStorageAllocation::visit_statement_list(Node *n) {
   // Leave nested scope
   m_storage_calc = save;  
 }
-
-// TODO: implement private member functions
