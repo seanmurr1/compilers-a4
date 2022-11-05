@@ -356,7 +356,7 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
   m_hl_iseq->append(new Instruction(HINS_mul_q, scaled_index, quad_index, Operand(Operand::IMM_IVAL, size)));
 
   // Add scaled index to pointer
-  Operand arr_base = arr->get_operand();
+  Operand arr_base = arr->get_address_of_operand();
   vreg = next_temp_vreg();
   Operand arr_shifted = Operand(Operand::VREG, vreg);
   m_hl_iseq->append(new Instruction(HINS_add_q, arr_shifted, arr_base, scaled_index));
@@ -382,6 +382,7 @@ void HighLevelCodegen::visit_variable_ref(Node *n) {
     Operand op(Operand::VREG, vreg);
     unsigned offset = sym->get_offset();
     m_hl_iseq->append(new Instruction(HINS_localaddr, op, Operand(Operand::IMM_IVAL, offset)));
+    n->set_operand(op);
   } else {
     vreg = sym->get_vreg();
     Operand op(Operand::VREG, vreg);

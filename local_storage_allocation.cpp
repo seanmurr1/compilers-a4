@@ -80,8 +80,6 @@ void LocalStorageAllocation::visit_function_definition(Node *n) {
   m_storage_calc.finish();
   m_total_local_storage = m_storage_calc.get_size();
   int next_temp_vreg = get_next_vreg();
-
-  printf("storage calc size: %u\n", m_storage_calc.get_size());
   
   // Just use offset field of symbol to store storage
   // We never use it for a function def node anyways...
@@ -99,6 +97,8 @@ void LocalStorageAllocation::visit_function_parameter(Node *n) {
 
 void LocalStorageAllocation::visit_statement_list(Node *n) {
   // Enter nested scope
+
+  // Issue with optimization...
   //StorageCalculator save = m_storage_calc;
   // Visit statements in list
   for (auto i = n->cbegin(); i != n->cend(); i++) {
