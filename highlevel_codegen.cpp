@@ -375,7 +375,13 @@ void HighLevelCodegen::visit_literal_value(Node *n) {
 
   // TODO: add logic for string constants
   
-  LiteralValue val = n->get_literal_value();
+  //LiteralValue val = n->get_literal_value();
+
+  const std::string &lexeme = n->get_kid(0)->get_str();
+  const Location &loc = n->get_kid(0)->get_loc();
+  LiteralValue val = LiteralValue::from_int_literal(lexeme, loc);
+
+
   int vreg = next_temp_vreg();
   Operand dest(Operand::VREG, vreg);
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_type());
@@ -410,8 +416,10 @@ void HighLevelCodegen::visit_unary_expression(Node *n) {
       }
       break;
     case TOK_AMPERSAND:
+      {
       Operand mem_loc = arg->get_address_of_operand();
       n->set_operand(mem_loc);
+      }
       break;
     case TOK_MINUS:
       {
