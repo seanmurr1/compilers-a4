@@ -7,6 +7,7 @@
 #include "type.h"
 #include "symtab.h"
 #include "ast_visitor.h"
+#include "location.h"
 
 class SemanticAnalysis : public ASTVisitor {
 private:
