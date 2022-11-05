@@ -332,7 +332,7 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
   if (index->get_type()->get_basic_type_kind() != BasicTypeKind::LONG) {
     vreg = next_temp_vreg();
     quad_index = Operand(Operand::VREG, vreg);
-    HighLevelOpcode convert_op = get_opcode(HINS_sconv_bq, index->get_type());
+    HighLevelOpcode convert_opcode = get_opcode(HINS_sconv_bq, index->get_type());
     // Upgrade index to LONG
     m_hl_iseq->append(new Instruction(convert_opcode, quad_index, raw_index));
   } else {
