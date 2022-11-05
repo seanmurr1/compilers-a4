@@ -287,7 +287,7 @@ void SemanticAnalysis::process_function_parameters(Node *parameter_list, std::ve
   // Add parameters as members to function type
   for (auto i = declared_parameters.cbegin(); i != declared_parameters.cend(); i++) {
     Node *parameter = *i;
-    fn_type->add_member(Member(parameter->get_str(), parameter->get_type()));
+    fn_type->add_member(Member(parameter->get_str(), parameter->get_kid(0)->get_type()));
   }
 }
 
