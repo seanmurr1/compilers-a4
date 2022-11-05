@@ -32,7 +32,7 @@ void LocalStorageAllocation::process_declarator(Node *declarator) {
       // AST_NAMED_DECLARATOR's 0'th kid has symbol to type
       Node *var = declarator->get_kid(0);
       std::string var_name = var->get_str();
-      Symbol *sym = var->get_symbol();
+      Symbol *sym = declarator->get_symbol();
       std::shared_ptr<Type> type = var->get_type();
 
       if ((type->is_integral() || type->is_pointer()) && !sym->requires_storage()) {
