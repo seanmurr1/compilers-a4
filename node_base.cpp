@@ -84,7 +84,7 @@ void NodeBase::set_operand(Operand op) {
 Operand NodeBase::get_operand() const {
   //assert(has_symbol());
 
-  if (m_symbol->requires_storage()) {
+  if (has_symbol() && m_symbol->requires_storage()) {
     return m_op.to_memref();
   } else {
     return m_op;
