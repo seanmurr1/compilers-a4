@@ -702,7 +702,6 @@ void SemanticAnalysis::visit_field_ref_expression(Node *n) {
   // Check for matching field name
   for (unsigned i = 0; i < struct_type->get_num_members(); i++) {
     const Member &mem = struct_type->get_member(i);
-    printf("Member name: %s\n", mem.get_name().c_str());
     if (mem.get_name() == field) {
       n->set_type(mem.get_type());
       return;

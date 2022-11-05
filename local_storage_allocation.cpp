@@ -90,6 +90,12 @@ void LocalStorageAllocation::visit_function_definition(Node *n) {
   printf("/* Function \'%s\' uses %u bytes of memory and %d virtual registers */\n", fn_name.c_str(), m_total_local_storage, next_temp_vreg);
 }
 
+void LocalStorageAllocation::visit_struct_type_definition(Node *n) {
+  // Don't allocate for struct type defs
+  return;
+}
+
+
 void LocalStorageAllocation::visit_function_parameter(Node *n) {
   Node *declarator = n->get_kid(1);
   process_declarator(declarator);
