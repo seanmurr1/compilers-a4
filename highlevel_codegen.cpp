@@ -329,10 +329,20 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
   Operand quad_index;
 
   // Check if need to convert index to quad word (64 bit pointers)
-  if (index->get_type()->get_basic_type_kind() != BasicTypeKind::LONG) {
+  BasicTypeKind basic_type = index->get_type()->get_basic_type_kind();
+  if (basic_type != BasicTypeKind::LONG) {
     vreg = next_temp_vreg();
     quad_index = Operand(Operand::VREG, vreg);
-    HighLevelOpcode convert_opcode = get_opcode(HINS_sconv_bq, index->get_type());
+    HighLevelOpcode convert_opcode;
+    if (basic_type == BasicTypeKind::CHAR) {
+      convert_opcode = HINS_sconv_bq;
+    } else if (basic_type == BasicTypeKind::SHORT) {
+      convert_opcode = HINS_sconv_wq;
+    } else if (basic_type == BasicTypeKind::INT) {
+      convert_opcode = HINS_sconv_lq;
+    } else {
+      // ERROR:
+    }
     // Upgrade index to LONG
     m_hl_iseq->append(new Instruction(convert_opcode, quad_index, raw_index));
   } else {
