@@ -362,13 +362,14 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
   m_hl_iseq->append(new Instruction(HINS_add_q, arr_shifted, arr_base, scaled_index));
 
   // Get memory at shifted ptr
-  vreg = next_temp_vreg();
-  Operand accessed_el = Operand(Operand::VREG, vreg);
-  HighLevelOpcode mov_op = get_opcode(HINS_mov_b, arr->get_type()->get_base_type());
-  m_hl_iseq->append(new Instruction(mov_op, accessed_el, arr_shifted.to_memref()));
+  // vreg = next_temp_vreg();
+  // Operand accessed_el = Operand(Operand::VREG, vreg);
+  // HighLevelOpcode mov_op = get_opcode(HINS_mov_b, arr->get_type()->get_base_type());
+  // m_hl_iseq->append(new Instruction(mov_op, accessed_el, arr_shifted.to_memref()));
 
   // Annotate node
-  n->set_operand(accessed_el);
+  //n->set_operand(accessed_el);
+  n->set_operand(arr_shifted.to_memref());
 }
 
 /**
