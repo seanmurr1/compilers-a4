@@ -7,6 +7,7 @@
 #include "grammar_symbols.h"
 #include "exceptions.h"
 #include "highlevel_codegen.h"
+#include "local_storage_allocation.h"
 
 namespace {
 
@@ -45,7 +46,7 @@ void HighLevelCodegen::process_parameter(Node *declarator, int register_index) {
       Operand var_op = var->get_operand();
       Operand arg_register(Operand::VREG, register_index);
       HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, var->get_type());
-      m_hl_iseq->append(new Instruction(move_opcode, var_op, arg_register));
+      m_hl_iseq->append(new Instruction(mov_opcode, var_op, arg_register));
       return;
   }
 
@@ -400,7 +401,7 @@ void HighLevelCodegen::visit_unary_expression(Node *n) {
       if (arg_op.is_memref()) {
         vreg = next_temp_vreg();
         Operand op(Operand::VREG, vreg);
-        HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, arg_op->get_type());
+        HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, arg->get_type());
         m_hl_iseq->append(new Instruction(mov_opcode, op, arg_op));
         n->set_operand(op.to_memref());
       } else {
@@ -413,6 +414,7 @@ void HighLevelCodegen::visit_unary_expression(Node *n) {
       n->set_operand(mem_loc);
       break;
     case TOK_MINUS:
+      {
       vreg = next_temp_vreg();
       Operand negative_one = Operand(Operand::IMM_IVAL, -1);
       Operand negator = Operand(Operand::VREG, vreg);
@@ -423,6 +425,7 @@ void HighLevelCodegen::visit_unary_expression(Node *n) {
       HighLevelOpcode mul_opcode = get_opcode(HINS_mul_b, arg->get_type());
       m_hl_iseq->append(new Instruction(mul_opcode, negated, arg_op, negator));
       n->set_operand(negated);
+      }
       break;
     case TOK_NOT:
       // TODO
@@ -437,7 +440,7 @@ void HighLevelCodegen::visit_unary_expression(Node *n) {
 /**
  * Generates operand for a struct's offset given a field name.
  **/
-Operand get_struct_offset(Node *struct_node, const std::string &field_name) {
+Operand HighLevelCodegen::get_struct_offset(Node *struct_node, const std::string &field_name) {
   // Find field offset
   unsigned offset;
   std::shared_ptr<Type> struct_type = struct_node->get_type();

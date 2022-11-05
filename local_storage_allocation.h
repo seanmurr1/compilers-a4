@@ -15,8 +15,6 @@ public:
   // local variable allocation starts at vr10
   static const int VREG_FIRST_LOCAL = 10;
 
-  StorageCalculator m_storage_calc;
-
 private:
   StorageCalculator m_storage_calc;
   unsigned m_total_local_storage;
