@@ -67,10 +67,15 @@ std::shared_ptr<Type> NodeBase::get_type() const {
   // this shouldn't be called unless there is actually a type
   // associated with this node
 
-  if (has_symbol())
+  printf("Getting type from node!\n");
+
+  if (has_symbol()) {
+    printf("Node has symbol, getting type from symbol...\n");
     return m_symbol->get_type(); // Symbol will definitely have a valid Type
+  }
   else {
     assert(m_type); // make sure a Type object actually exists
+    printf("Node has type already, type: %s\n", m_type->as_str().c_str());
     return m_type;
   }
 }
