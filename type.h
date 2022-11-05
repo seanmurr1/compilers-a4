@@ -137,6 +137,7 @@ private:
 
 public:
   Member(const std::string &name, const std::shared_ptr<Type> &type);
+  Member(const std::string &name, const std::shared_ptr<Type> &type, unsigned offset);
   ~Member();
 
   const std::string &get_name() const;

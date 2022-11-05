@@ -407,8 +407,7 @@ void SemanticAnalysis::visit_struct_type_definition(Node *n) {
   int index = 0;
   for (auto i = declared_fields.cbegin(); i != declared_fields.cend(); i++) {
     Node *field = *i;
-    struct_type->add_member(Member(field->get_str(), field->get_type()));
-    struct_type->get_member(index).set_offset(offset);
+    struct_type->add_member(Member(field->get_str(), field->get_type(), offset));
     index++;
     offset += field->get_type()->get_storage_size();
   }

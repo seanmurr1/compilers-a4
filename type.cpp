@@ -111,6 +111,13 @@ Member::Member(const std::string &name, const std::shared_ptr<Type> &type)
   , m_type(type) {
 }
 
+Member::Member(const std::string &name, const std::shared_ptr<Type> &type, unsigned offset)
+  : m_name(name)
+  , m_type(type)
+  , m_offset(offset) {
+}
+
+
 Member::~Member() {
 }
 
