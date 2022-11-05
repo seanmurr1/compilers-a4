@@ -351,6 +351,7 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
 
   // Mult index by size of type of array
   unsigned size = arr->get_type()->get_base_type()->get_storage_size();
+  print("base array el size: %u\n", size);
   vreg = next_temp_vreg();
   Operand scaled_index = Operand(Operand::VREG, vreg);
   m_hl_iseq->append(new Instruction(HINS_mul_q, scaled_index, quad_index, Operand(Operand::IMM_IVAL, size)));
