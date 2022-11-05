@@ -93,7 +93,7 @@ Operand NodeBase::get_operand() const {
 
 Operand NodeBase::get_address_of_operand() const {
   //assert(has_symbol());
-  assert(m_symbol->requires_storage());
+  //assert(m_symbol->requires_storage());
   return m_op;
 }
 
