@@ -200,9 +200,9 @@ void HighLevelCodegen::generate_assignment(Node *n) {
 
   Node *left_node = n->get_kid(1);
 
-  printf("left name: %s\n", n->get_kid(1)->get_kid(0)->get_str().c_str());
-  printf("left has symbol: %s\n", left_node->has_symbol() ? "True" : "False");
-  printf("left type: %s\n", n->get_kid(1)->get_type()->as_str().c_str());
+  //printf("left name: %s\n", n->get_kid(1)->get_kid(0)->get_str().c_str());
+  //printf("left has symbol: %s\n", left_node->has_symbol() ? "True" : "False");
+  //printf("left type: %s\n", n->get_kid(1)->get_type()->as_str().c_str());
 
   printf("Getting opcode...\n");
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_kid(1)->get_type());

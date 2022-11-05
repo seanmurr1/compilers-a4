@@ -31,6 +31,8 @@ const std::string &Symbol::get_name() const {
 }
 
 std::shared_ptr<Type> Symbol::get_type() const {
+  printf("Getting type from symbol %s\n", m_name.c_str());
+  printf("Type: %s\n", m_type->as_str().c_str());
   return m_type;
 }
 
