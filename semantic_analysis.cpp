@@ -287,7 +287,7 @@ void SemanticAnalysis::process_function_parameters(Node *parameter_list, std::ve
   // Add parameters as members to function type
   for (auto i = declared_parameters.cbegin(); i != declared_parameters.cend(); i++) {
     Node *parameter = *i;
-    fn_type->add_member(Member(parameter->get_str(), parameter->get_kid(0)->get_type()));
+    fn_type->add_member(Member(parameter->get_kid(0)->get_str(), parameter->get_kid(0)->get_type()));
   }
 }
 
@@ -411,7 +411,7 @@ void SemanticAnalysis::visit_struct_type_definition(Node *n) {
   int index = 0;
   for (auto i = declared_fields.cbegin(); i != declared_fields.cend(); i++) {
     Node *field = *i;
-    struct_type->add_member(Member(field->get_str(), field->get_type(), offset));
+    struct_type->add_member(Member(field->get_kid(0)->get_str(), field->get_type(), offset));
     index++;
     offset += field->get_type()->get_storage_size();
   }
@@ -695,7 +695,6 @@ void SemanticAnalysis::visit_field_ref_expression(Node *n) {
   visit(n->get_kid(0));
   // Struct field reference
   const std::string &field = n->get_kid(1)->get_str();
-  printf("Searching for field: %s\n", field.c_str());
   std::shared_ptr<Type> struct_type = n->get_kid(0)->get_type();
   // Check if type is actually a struct
   if (!struct_type->is_struct()) SemanticError::raise(n->get_loc(), "Cannot reference non-struct with .");
