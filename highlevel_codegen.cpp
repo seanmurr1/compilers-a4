@@ -42,8 +42,10 @@ void HighLevelCodegen::process_parameter(Node *declarator, int register_index) {
       return;
     case AST_NAMED_DECLARATOR:
       Node *var = declarator->get_kid(0);
-      visit_variable_ref(var);
-      Operand var_op = var->get_operand();
+      //visit_variable_ref(var);
+      visit_variable_ref(declarator);
+      //Operand var_op = var->get_operand();
+      Operand var_op = declarator->get_operand();
       Operand arg_register(Operand::VREG, register_index);
       HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, var->get_type());
       m_hl_iseq->append(new Instruction(mov_opcode, var_op, arg_register));
