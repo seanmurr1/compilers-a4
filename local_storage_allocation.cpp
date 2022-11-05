@@ -60,6 +60,7 @@ void LocalStorageAllocation::visit_declarator_list(Node *n) {
 void LocalStorageAllocation::visit_function_definition(Node *n) {
   m_total_local_storage = 0;
   m_next_vreg = VREG_FIRST_LOCAL;
+  m_storage_calc = StorageCalculator();
 
   const std::string &fn_name = n->get_kid(1)->get_str();
   std::shared_ptr<Symbol> fn_sym = n->get_symbol();
@@ -79,6 +80,8 @@ void LocalStorageAllocation::visit_function_definition(Node *n) {
   m_storage_calc.finish();
   m_total_local_storage = m_storage_calc.get_size();
   int next_temp_vreg = get_next_vreg();
+
+  printf("storage calc size: %u\n", m_storage_calc.get_size());
   
   // Just use offset field of symbol to store storage
   // We never use it for a function def node anyways...
