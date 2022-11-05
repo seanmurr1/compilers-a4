@@ -388,7 +388,6 @@ void HighLevelCodegen::visit_literal_value(Node *n) {
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_type());
   m_hl_iseq->append(new Instruction(mov_opcode, dest, Operand(Operand::IMM_IVAL, val.get_int_value())));
   n->set_operand(dest);
-  
 }
 
 /**

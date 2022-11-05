@@ -278,7 +278,8 @@ void SemanticAnalysis::process_function_parameters(Node *parameter_list, std::ve
     Node *parameter = *i;
     // Visit base type
     visit(parameter->get_kid(0));
-    std::shared_ptr<Type> base_type = parameter->get_kid(0)->get_type();
+    //std::shared_ptr<Type> base_type = parameter->get_kid(0)->get_type();
+    std::shared_ptr<Type> base_type = parameter->get_type();
     // Process declarators
     process_declarator(declared_parameters, parameter->get_kid(1), base_type);
   }
@@ -379,7 +380,8 @@ void SemanticAnalysis::visit_struct_type_definition(Node *n) {
   const std::string &struct_name = n->get_kid(0)->get_str();
   std::shared_ptr<Type> struct_type(new StructType(struct_name));
   if (m_cur_symtab->has_symbol_local("struct " + struct_name)) SemanticError::raise(n->get_loc(), "Struct name already defined");
-  m_cur_symtab->define(SymbolKind::TYPE, "struct " + struct_name, struct_type);
+  std::shared_ptr<Symbol> sym = m_cur_symtab->define(SymbolKind::TYPE, "struct " + struct_name, struct_type);
+  n->set_symbol(sym);
 
   Node *field_list = n->get_kid(1);
   std::vector<Node *> declared_fields;
