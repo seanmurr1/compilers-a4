@@ -15,7 +15,7 @@ namespace {
 HighLevelOpcode get_opcode(HighLevelOpcode base_opcode, const std::shared_ptr<Type> &type) {
   if (type->is_basic())
     return static_cast<HighLevelOpcode>(int(base_opcode) + int(type->get_basic_type_kind()));
-  else if (type->is_pointer())
+  else if (type->is_pointer() || type->is_array())
     return static_cast<HighLevelOpcode>(int(base_opcode) + int(BasicTypeKind::LONG));
   else
     RuntimeError::raise("attempt to use type '%s' as data in opcode selection", type->as_str().c_str());
@@ -351,7 +351,6 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
 
   // Mult index by size of type of array
   unsigned size = arr->get_type()->get_base_type()->get_storage_size();
-  printf("base array el size: %u\n", size);
   vreg = next_temp_vreg();
   Operand scaled_index = Operand(Operand::VREG, vreg);
   m_hl_iseq->append(new Instruction(HINS_mul_q, scaled_index, quad_index, Operand(Operand::IMM_IVAL, size)));
