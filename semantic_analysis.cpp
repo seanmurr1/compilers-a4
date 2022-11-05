@@ -438,6 +438,7 @@ bool SemanticAnalysis::is_relational_or_logical_op(int tag) {
 bool SemanticAnalysis::is_pointer_dereference(Node *n) {
   //return n->get_kid(0)->get_tag() == TOK_ASTERISK && n->get_kid(1)->get_tag() == AST_VARIABLE_REF;
   return n->get_kid(0)->get_tag() == TOK_ASTERISK;
+}
 
 /**
  * Checks if a node is an l-value, which is one of the following:
