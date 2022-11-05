@@ -321,9 +321,11 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
   Node *arr = n->get_kid(0);
   Node *index = n->get_kid(1);
 
+  visit(arr);
+  visit(index);
+
   int vreg;
   Operand raw_index = index->get_operand();
-  printf("raw index kind: %d\n", raw_index.get_kind());
   Operand quad_index;
 
   // Check if need to convert index to quad word (64 bit pointers)
