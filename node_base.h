@@ -34,7 +34,7 @@
 class NodeBase {
 private:
   // fields (pointer to Type, pointer to Symbol, etc.)
-  Symbol *m_symbol;
+  std::shared_ptr<Symbol> m_symbol;
   std::shared_ptr<Type> m_type;
 
   Operand m_op;
@@ -47,10 +47,10 @@ public:
   NodeBase();
   virtual ~NodeBase();
 
-  void set_symbol(Symbol *symbol);
+  void set_symbol(const std::shared_ptr<Symbol> &symbol);
   void set_type(const std::shared_ptr<Type> &type);
   bool has_symbol() const;
-  Symbol *get_symbol() const;
+  std::shared_ptr<Symbol> get_symbol() const;
   std::shared_ptr<Type> get_type() const;
 
   void set_operand(Operand op);

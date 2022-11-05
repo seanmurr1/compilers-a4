@@ -152,7 +152,7 @@ void Context::highlevel_codegen(ModuleCollector *module_collector) {
   // collect all of the global variables
   SymbolTable *globals = m_sema.get_global_symtab();
   for (auto i = globals->cbegin(); i != globals->cend(); ++i) {
-    Symbol *sym = *i;
+    std::shared_ptr<Symbol> sym = *i;
     if (sym->get_kind() == SymbolKind::VARIABLE)
       module_collector->collect_global_var(sym->get_name(), sym->get_type());
   }

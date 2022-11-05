@@ -33,7 +33,7 @@ NodeBase::~NodeBase() {
  * Set node's symbol.
  * Must not have a type or symbol already.
  **/
-void NodeBase::set_symbol(Symbol *symbol) {
+void NodeBase::set_symbol(const std::shared_ptr<Symbol> &symbol) {
   assert(!has_symbol());
   assert(m_type == nullptr);
   m_symbol = symbol;
@@ -55,7 +55,7 @@ bool NodeBase::has_symbol() const {
 }
 
 // Get node's symbol.
-Symbol *NodeBase::get_symbol() const {
+std::shared_ptr<Symbol> NodeBase::get_symbol() const {
   return m_symbol;
 }
 
@@ -67,15 +67,10 @@ std::shared_ptr<Type> NodeBase::get_type() const {
   // this shouldn't be called unless there is actually a type
   // associated with this node
 
-  printf("Getting type from node!\n");
-
-  if (has_symbol()) {
-    printf("Node has symbol, getting type from symbol...\n");
+  if (has_symbol()) 
     return m_symbol->get_type(); // Symbol will definitely have a valid Type
-  }
   else {
     assert(m_type); // make sure a Type object actually exists
-    printf("Node has type already, type: %s\n", m_type->as_str().c_str());
     return m_type;
   }
 }

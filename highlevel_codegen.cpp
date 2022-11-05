@@ -63,7 +63,7 @@ void HighLevelCodegen::visit_function_definition(Node *n) {
   std::string fn_name = n->get_kid(1)->get_str();
   m_return_label_name = ".L" + fn_name + "_return";
 
-  Symbol *fn_sym = n->get_symbol();
+  std::shared_ptr<Symbol> fn_sym = n->get_symbol();
 
   unsigned total_local_storage = fn_sym->get_offset();
   m_next_temp_vreg = fn_sym->get_vreg();
@@ -198,15 +198,7 @@ void HighLevelCodegen::generate_assignment(Node *n) {
   Operand left = n->get_kid(1)->get_operand();
   Operand right = n->get_kid(2)->get_operand();
 
-  Node *left_node = n->get_kid(1);
-
-  //printf("left name: %s\n", n->get_kid(1)->get_kid(0)->get_str().c_str());
-  //printf("left has symbol: %s\n", left_node->has_symbol() ? "True" : "False");
-  //printf("left type: %s\n", n->get_kid(1)->get_type()->as_str().c_str());
-
-  printf("Getting opcode...\n");
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_kid(1)->get_type());
-  printf("Done opcode...\n");
 
   m_hl_iseq->append(new Instruction(mov_opcode, left, right));
   n->set_operand(left); // TODO?
@@ -362,7 +354,7 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
  **/
 void HighLevelCodegen::visit_variable_ref(Node *n) {
   int vreg;
-  Symbol *sym = n->get_symbol();
+  std::shared_ptr<Symbol> sym = n->get_symbol();
   if (sym->requires_storage()) {
     vreg = next_temp_vreg();
     Operand op(Operand::VREG, vreg);

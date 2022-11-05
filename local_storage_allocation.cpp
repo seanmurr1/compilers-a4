@@ -32,7 +32,7 @@ void LocalStorageAllocation::process_declarator(Node *declarator) {
       // AST_NAMED_DECLARATOR's 0'th kid has symbol to type
       Node *var = declarator->get_kid(0);
       std::string var_name = var->get_str();
-      Symbol *sym = declarator->get_symbol();
+      std::shared_ptr<Symbol> sym = declarator->get_symbol();
       std::shared_ptr<Type> type = var->get_type();
       if ((type->is_integral() || type->is_pointer()) && !sym->requires_storage()) {
         // Set vreg if var is integral or a pointer, and its address is never taken
@@ -62,7 +62,7 @@ void LocalStorageAllocation::visit_function_definition(Node *n) {
   m_next_vreg = VREG_FIRST_LOCAL;
 
   const std::string &fn_name = n->get_kid(1)->get_str();
-  Symbol *fn_sym = n->get_symbol();
+  std::shared_ptr<Symbol> fn_sym = n->get_symbol();
 
   // TODO: do anything with return type?
 

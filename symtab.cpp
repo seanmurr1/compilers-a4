@@ -31,8 +31,6 @@ const std::string &Symbol::get_name() const {
 }
 
 std::shared_ptr<Type> Symbol::get_type() const {
-  printf("Getting type from symbol %s\n", m_name.c_str());
-  printf("Type: %s\n", m_type->as_str().c_str());
   return m_type;
 }
 
@@ -78,9 +76,9 @@ SymbolTable::SymbolTable(SymbolTable *parent)
 }
 
 SymbolTable::~SymbolTable() {
-  for (auto i = m_symbols.begin(); i != m_symbols.end(); ++i) {
-    delete *i;
-  }
+  // for (auto i = m_symbols.begin(); i != m_symbols.end(); ++i) {
+  //   delete *i;
+  // }
 }
 
 SymbolTable *SymbolTable::get_parent() const {
@@ -99,28 +97,28 @@ bool SymbolTable::has_symbol_local(const std::string &name) const {
   return lookup_local(name) != nullptr;
 }
 
-Symbol *SymbolTable::lookup_local(const std::string &name) const {
+std::shared_ptr<Symbol> SymbolTable::lookup_local(const std::string &name) const {
   auto i = m_lookup.find(name);
   return (i != m_lookup.end()) ? m_symbols[i->second] : nullptr;
 }
 
-Symbol *SymbolTable::declare(SymbolKind sym_kind, const std::string &name, const std::shared_ptr<Type> &type) {
-  Symbol *sym = new Symbol(sym_kind, name, type, this, true);
+std::shared_ptr<Symbol> SymbolTable::declare(SymbolKind sym_kind, const std::string &name, const std::shared_ptr<Type> &type) {
+  std::shared_ptr<Symbol> sym(new Symbol(sym_kind, name, type, this, true));
   add_symbol(sym);
   return sym;
 }
 
-Symbol *SymbolTable::define(SymbolKind sym_kind, const std::string &name, const std::shared_ptr<Type> &type) {
-  Symbol *sym = new Symbol(sym_kind, name, type, this, false);
+std::shared_ptr<Symbol> SymbolTable::define(SymbolKind sym_kind, const std::string &name, const std::shared_ptr<Type> &type) {
+  std::shared_ptr<Symbol> sym(new Symbol(sym_kind, name, type, this, false));
   add_symbol(sym);
   return sym;
 }
 
-Symbol *SymbolTable::lookup_recursive(const std::string &name) const {
+std::shared_ptr<Symbol> SymbolTable::lookup_recursive(const std::string &name) const {
   const SymbolTable *scope = this;
 
   while (scope != nullptr) {
-    Symbol *sym = scope->lookup_local(name);
+    std::shared_ptr<Symbol> sym = scope->lookup_local(name);
     if (sym != nullptr)
       return sym;
     scope = scope->get_parent();
@@ -145,7 +143,7 @@ const Type *SymbolTable::get_fn_type() const {
   return nullptr;
 }
 
-void SymbolTable::add_symbol(Symbol *sym) {
+void SymbolTable::add_symbol(const std::shared_ptr<Symbol> &sym) {
   assert(!has_symbol_local(sym->get_name()));
 
   unsigned pos = unsigned(m_symbols.size());

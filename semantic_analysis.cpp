@@ -84,7 +84,7 @@ void SemanticAnalysis::visit_struct_type(Node *n) {
       case TOK_IDENT:
         {
           if (type_set) SemanticError::raise(n->get_loc(), "Malformed struct type");
-          Symbol *struct_sym = m_cur_symtab->lookup_recursive("struct " + type_child->get_str());
+          std::shared_ptr<Symbol> struct_sym = m_cur_symtab->lookup_recursive("struct " + type_child->get_str());
           if (struct_sym == nullptr) SemanticError::raise(n->get_loc(), "Unknown struct type");
           struct_type = struct_sym->get_type();
           type_set = true;
@@ -263,7 +263,7 @@ void SemanticAnalysis::add_vars_to_sym_table(std::vector<Node *> &vars) {
     Node *var_parent = *i;
     Node *var = var_parent->get_kid(0);
     if (m_cur_symtab->has_symbol_local(var->get_str())) SemanticError::raise(var->get_loc(), "Name already defined");
-    Symbol *sym = m_cur_symtab->define(SymbolKind::VARIABLE, var->get_str(), var->get_type());
+    std::shared_ptr<Symbol> sym = m_cur_symtab->define(SymbolKind::VARIABLE, var->get_str(), var->get_type());
     var_parent->set_symbol(sym);
   }
 }
@@ -321,7 +321,7 @@ void SemanticAnalysis::visit_function_definition(Node *n) {
   process_function_parameters(n->get_kid(2), declared_parameters, fn_type);  
   // Define function
   if (m_cur_symtab->has_symbol_local(fn_name)) SemanticError::raise(n->get_loc(), "Function name already in use");
-  Symbol *sym = m_cur_symtab->define(SymbolKind::FUNCTION, fn_name, fn_type);
+  std::shared_ptr<Symbol> sym = m_cur_symtab->define(SymbolKind::FUNCTION, fn_name, fn_type);
   n->set_symbol(sym);
 
   // Define parameters (since this is a function definition, not declaration)
@@ -756,7 +756,7 @@ void SemanticAnalysis::visit_array_element_ref_expression(Node *n) {
  **/
 void SemanticAnalysis::visit_variable_ref(Node *n) {
   const std::string &var_name = n->get_kid(0)->get_str();
-  Symbol *sym = m_cur_symtab->lookup_recursive(var_name);
+  std::shared_ptr<Symbol> sym = m_cur_symtab->lookup_recursive(var_name);
   if (sym == nullptr) SemanticError::raise(n->get_loc(), "Undeclared variable reference");
 
   assert (!n->has_symbol());

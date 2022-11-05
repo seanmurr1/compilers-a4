@@ -57,7 +57,7 @@ public:
 class SymbolTable {
 private:
   SymbolTable *m_parent;
-  std::vector<Symbol *> m_symbols;
+  std::vector<std::shared_ptr<Symbol>> m_symbols;
   std::map<std::string, unsigned> m_lookup;
   bool m_has_params; // true if this symbol table contains function parameters
   std::shared_ptr<Type> m_fn_type; // this is set to the type of the enclosing function (if any)
@@ -79,21 +79,21 @@ public:
   // Note that the caller should verify that a name is not defined
   // in the current scope before calling declare or define.
   bool has_symbol_local(const std::string &name) const;
-  Symbol *lookup_local(const std::string &name) const;
-  Symbol *declare(SymbolKind sym_kind, const std::string &name, const std::shared_ptr<Type> &type);
-  Symbol *define(SymbolKind sym_kind, const std::string &name, const std::shared_ptr<Type> &type);
+  std::shared_ptr<Symbol> lookup_local(const std::string &name) const;
+  std::shared_ptr<Symbol> declare(SymbolKind sym_kind, const std::string &name, const std::shared_ptr<Type> &type);
+  std::shared_ptr<Symbol> define(SymbolKind sym_kind, const std::string &name, const std::shared_ptr<Type> &type);
 
   // Iterate through the symbol table entries in the order in which they were added
   // to the symbol table. This is important for struct types, where the representation
   // of the type needs to record the fields (and their types) in the exact order
   // in which they appeared in the source code.
-  typedef std::vector<Symbol *>::const_iterator const_iterator;
+  typedef std::vector<std::shared_ptr<Symbol>>::const_iterator const_iterator;
   const_iterator cbegin() const { return m_symbols.cbegin(); }
   const_iterator cend() const { return m_symbols.cend(); }
 
   // Operations that search recursively starting from the current (local)
   // scope and expanding to outer scopes as necessary
-  Symbol *lookup_recursive(const std::string &name) const;
+  std::shared_ptr<Symbol> lookup_recursive(const std::string &name) const;
 
   // This can be called on the symbol table representing the function parameter
   // scope of a function to record the exact type of the function
@@ -106,7 +106,7 @@ public:
   const Type *get_fn_type() const;
 
 private:
-  void add_symbol(Symbol *sym);
+  void add_symbol(const std::shared_ptr<Symbol> &sym);
   int get_depth() const;
 };
 
