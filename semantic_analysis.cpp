@@ -262,7 +262,8 @@ void SemanticAnalysis::add_vars_to_sym_table(std::vector<Node *> &vars) {
   for (auto i = vars.cbegin(); i != vars.cend(); i++) {
     Node *var = *i;
     if (m_cur_symtab->has_symbol_local(var->get_str())) SemanticError::raise(var->get_loc(), "Name already defined");
-    m_cur_symtab->define(SymbolKind::VARIABLE, var->get_str(), var->get_type());
+    Symbol *sym = m_cur_symtab->define(SymbolKind::VARIABLE, var->get_str(), var->get_type());
+    var->set_symbol(sym);
   }
 }
 
