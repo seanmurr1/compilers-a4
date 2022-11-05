@@ -278,8 +278,8 @@ void SemanticAnalysis::process_function_parameters(Node *parameter_list, std::ve
     Node *parameter = *i;
     // Visit base type
     visit(parameter->get_kid(0));
-    //std::shared_ptr<Type> base_type = parameter->get_kid(0)->get_type();
-    std::shared_ptr<Type> base_type = parameter->get_type();
+    std::shared_ptr<Type> base_type = parameter->get_kid(0)->get_type();
+    //std::shared_ptr<Type> base_type = parameter->get_type();
     // Process declarators
     process_declarator(declared_parameters, parameter->get_kid(1), base_type);
   }
