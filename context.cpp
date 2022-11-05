@@ -33,6 +33,7 @@
 #include "symtab.h"
 #include "highlevel_codegen.h"
 #include "context.h"
+#include "local_storage_allocation.h"
 
 Context::Context()
   : m_ast(nullptr) {
@@ -141,6 +142,8 @@ void Context::collect_ast_string_constants(Node *n, ModuleCollector *module_coll
 void Context::highlevel_codegen(ModuleCollector *module_collector) {
   // TODO: do anything that's necessary prior to high-level code gen
   //       (e.g., storage allocation)
+  LocalStorageAllocation storage_allocation;
+  storage_allocation.visit(m_ast);
 
   // TODO: find all of the string constants in the AST
   //       and call the ModuleCollector's collect_string_constant
