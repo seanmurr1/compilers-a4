@@ -62,6 +62,7 @@ void LocalStorageAllocation::visit_function_definition(Node *n) {
   m_total_local_storage = 0;
   m_next_vreg = VREG_FIRST_LOCAL;
 
+  const std::string &fn_name = n->get_kid(1)->get_str();
   Symbol *fn_sym = n->get_symbol();
 
   // TODO: do anything with return type?
@@ -78,12 +79,15 @@ void LocalStorageAllocation::visit_function_definition(Node *n) {
 
   m_storage_calc.finish();
   m_total_local_storage = m_storage_calc.get_size();
+  int next_temp_vreg = get_next_vreg();
   
   // Just use offset field of symbol to store storage
   // We never use it for a function def node anyways...
   fn_sym->set_offset(m_total_local_storage);
   // Use vreg field to store next temp vreg for function to use
-  fn_sym->set_vreg(get_next_vreg());
+  fn_sym->set_vreg(next_temp_vreg);
+
+  printf("/* Function \'%s\' uses %u bytes of memory and %d virtual registers */\n", fn_name.c_str(), m_total_local_storage, next_temp_vreg);
 }
 
 void LocalStorageAllocation::visit_function_parameter(Node *n) {
