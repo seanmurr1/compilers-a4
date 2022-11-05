@@ -5,9 +5,9 @@
 #include "local_storage_allocation.h"
 
 LocalStorageAllocation::LocalStorageAllocation()
-  : m_total_local_storage(0U)
-  , m_next_vreg(VREG_FIRST_LOCAL)
-  , m_storage_calc() {
+  : m_storage_calc()
+  , m_total_local_storage(0U)
+  , m_next_vreg(VREG_FIRST_LOCAL) {
 }
 
 LocalStorageAllocation::~LocalStorageAllocation() {
