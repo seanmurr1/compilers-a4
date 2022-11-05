@@ -82,7 +82,7 @@ void NodeBase::set_operand(Operand op) {
 
 // Get operand associated with node
 Operand NodeBase::get_operand() const {
-  assert(has_symbol());
+  //assert(has_symbol());
 
   if (m_symbol->requires_storage()) {
     return m_op.to_memref();
@@ -92,7 +92,7 @@ Operand NodeBase::get_operand() const {
 }
 
 Operand NodeBase::get_address_of_operand() const {
-  assert(has_symbol());
+  //assert(has_symbol());
   assert(m_symbol->requires_storage());
   return m_op;
 }
