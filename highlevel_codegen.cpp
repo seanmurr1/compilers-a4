@@ -198,13 +198,13 @@ void HighLevelCodegen::generate_assignment(Node *n) {
   Operand left = n->get_kid(1)->get_operand();
   Operand right = n->get_kid(2)->get_operand();
 
-  printf("left name: %s\n", n->get_kid(1)->get_str().c_str());
+  printf("left name: %s\n", n->get_kid(1)->get_kid(0)->get_str().c_str());
   printf("left type: %s\n", n->get_kid(1)->get_type()->as_str().c_str());
 
   printf("Getting opcode...\n");
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_kid(1)->get_type());
   printf("Done opcode...\n");
-  
+
   m_hl_iseq->append(new Instruction(mov_opcode, left, right));
   n->set_operand(left); // TODO?
 }
