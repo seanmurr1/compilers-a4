@@ -304,6 +304,9 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
   // Call function
   std::string fn_name = n->get_kid(0)->get_kid(0)->get_str();
   m_hl_iseq->append(new Instruction(HINS_call, Operand(Operand::LABEL, fn_name)));
+
+  // Annotate node with return value in vr0
+  n->set_operand(Operand(Operand::VREG, LocalStorageAllocation::VREG_RETVAL));
 }
 
 /**
