@@ -150,6 +150,7 @@ void SymbolTable::add_symbol(Symbol *sym) {
   m_symbols.push_back(sym);
   m_lookup[sym->get_name()] = pos;
 
+  return;
   // Assignment 3 only: print out symbol table entries as they are added
   printf("%d|", get_depth());
   printf("%s|", sym->get_name().c_str());

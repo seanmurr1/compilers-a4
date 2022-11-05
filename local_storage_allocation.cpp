@@ -39,12 +39,12 @@ void LocalStorageAllocation::process_declarator(Node *declarator) {
         // Set vreg if var is integral or a pointer, and its address is never taken
         int vreg = get_next_vreg();
         sym->set_vreg(vreg);
-        printf("/* variable \'%s\' allocated vreg %d */\n", var_name, vreg);
+        printf("/* variable \'%s\' allocated vreg %d */\n", var_name.c_str(), vreg);
       } else {
         // Allocate offset in functions local storage area
         unsigned offset = m_storage_calc.add_field(type);
         sym->set_offset(offset);
-        printf("/* variable \'%s\' allocated %d bytes of storage at offset %d */\n", type->get_storage_size(), offset);
+        printf("/* variable \'%s\' allocated %u bytes of storage at offset %u */\n", var_name.c_str(), type->get_storage_size(), offset);
       }
       return;
   }
