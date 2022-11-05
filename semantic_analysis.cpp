@@ -695,6 +695,7 @@ void SemanticAnalysis::visit_field_ref_expression(Node *n) {
   visit(n->get_kid(0));
   // Struct field reference
   const std::string &field = n->get_kid(1)->get_str();
+  printf("Searching for field: %s\n", field.c_str());
   std::shared_ptr<Type> struct_type = n->get_kid(0)->get_type();
   // Check if type is actually a struct
   if (!struct_type->is_struct()) SemanticError::raise(n->get_loc(), "Cannot reference non-struct with .");
@@ -702,6 +703,7 @@ void SemanticAnalysis::visit_field_ref_expression(Node *n) {
   // Check for matching field name
   for (unsigned i = 0; i < struct_type->get_num_members(); i++) {
     const Member &mem = struct_type->get_member(i);
+    printf("Member name: %s\n", mem.get_name().c_str());
     if (mem.get_name() == field) {
       n->set_type(mem.get_type());
       return;
