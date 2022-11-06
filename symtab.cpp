@@ -151,7 +151,7 @@ void SymbolTable::add_symbol(const std::shared_ptr<Symbol> &sym) {
   m_lookup[sym->get_name()] = pos;
 
   // Dont't print for assignment 4.
-  //return;
+  return;
   
   // Assignment 3 only: print out symbol table entries as they are added
   printf("%d|", get_depth());
