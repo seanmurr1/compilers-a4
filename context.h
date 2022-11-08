@@ -52,11 +52,12 @@ public:
   // Get pointer to root of AST
   Node *get_ast() const { return m_ast; }
 
-  // TODO: add member functions for semantic analysis, code generation, etc.
+  // functions for semantic analysis, code generation, etc.
   void analyze();
   void highlevel_codegen(ModuleCollector *module_collector);
 
   void collect_ast_string_constants(Node *n, ModuleCollector *module_collector);
+  void lowlevel_codegen(ModuleCollector *module_collector, bool optimize = false);
 };
 
 #endif // CONTEXT_H
