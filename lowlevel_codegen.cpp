@@ -562,7 +562,7 @@ void LowLevelCodeGen::hl_cjmp_to_ll_helper(Instruction *hl_ins, const std::share
 void LowLevelCodeGen::hl_conv_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, int prev_size, int new_size) {
   LowLevelOpcode prev_mov_opcode = select_ll_opcode(MINS_MOVB, prev_size);
   LowLevelOpcode new_mov_opcode = select_ll_opcode(MINS_MOVB, new_size);
-  LowLevelOpcode conv_opcode = HL_TO_LL[hl_opcode];
+  LowLevelOpcode conv_opcode = HL_TO_LL.at(hl_opcode);
   
   Operand before_conv_operand = get_ll_operand(hl_ins->get_operand(1), prev_size, ll_iseq);
   Operand after_conv_operand = get_ll_operand(hl_ins->get_operand(0), new_size, ll_iseq);
