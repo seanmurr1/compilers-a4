@@ -679,7 +679,7 @@ void SemanticAnalysis::visit_function_call_expression(Node *n) {
       arg_list->set_kid(i, promote_type(parameter, left_type->get_basic_type_kind(), left_type->is_signed()));
     } 
     // Annotate parameter
-    parameter->set_type(left_type);
+    arg_list->get_kid(i)->set_type(left_type);
   }
   // Annotate function call
   n->set_type(fn_type->get_base_type());
