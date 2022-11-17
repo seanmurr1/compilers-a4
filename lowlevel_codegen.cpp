@@ -241,15 +241,49 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
   // for choosing the appropriate low-level instructions and
   // machine register operands.
 
+  // jmp instruction
   if (hl_opcode == HINS_jmp) {
     ll_iseq->append(new Instruction(MINS_JMP, hl_ins->get_operand(0)));
     return;
   }
 
+  // call instruction
+  if (hl_opcode == HINS_call) {
+    ll_iseq->append(new Instruction(MINS_CALL, hl_ins->get_operand(0)));
+    return;
+  }
+
+  // Comparisons
+  if (match_hl(HINS_cmplte_b, hl_opcode)) {
+    hl_cmplte_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
+  } else if (match_hl(HINS_cmplt_b, hl_opcode)) {
+    hl_cmplt_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
+  } else if (match_hl(HINS_cmpgte_b, hl_opcode)) {
+    hl_cmpgte_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
+  } else if (match_hl(HINS_cmpgte_b, hl_opcode)) {
+    hl_cmpgt_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
+  }
+
+  // Conditional jumps
+  if (hl_opcode == HINS_cjmp_t) {
+    hl_cjmp_t_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
+  } else if (hl_opcode == HINS_cjmp_f) {
+    hl_cjmp_f_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
+  }
+
+  // mov instruction
   if (match_hl(HINS_mov_b, hl_opcode)) {
     hl_mov_to_ll(hl_ins, ll_iseq, hl_opcode);
     return;
   }
+
+  // add instruction
   if (match_hl(HINS_add_b, hl_opcode)) {
     hl_add_to_ll(hl_ins, ll_iseq, hl_opcode);
     return;
@@ -267,10 +301,10 @@ long LowLevelCodeGen::get_stack_offset(int vreg_num) {
 }
 
 Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_ptr<InstructionSequence> &ll_iseq) {
-  // Check for immediate value
-  if (op.is_imm_ival()) {
+  // Check for immediate value, or label
+  if (op.is_imm_ival() || op.is_label()) {
     return op;
-  }
+  } 
   // TODO: deal with IMM_label?
   
   Operand::Kind mreg_kind = select_mreg_kind(size);
@@ -350,3 +384,86 @@ void LowLevelCodeGen::hl_add_to_ll(Instruction *hl_ins, const std::shared_ptr<In
   ll_iseq->append(new Instruction(add_opcode, src_right_operand, r10));
   ll_iseq->append(new Instruction(mov_opcode, r10, dest_operand));
 }
+
+void LowLevelCodeGen::hl_cmplte_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  hl_cmp_to_ll_helper(hl_ins, ll_iseq, hl_opcode, MINS_SETLE);
+}
+
+void LowLevelCodeGen::hl_cmplt_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  hl_cmp_to_ll_helper(hl_ins, ll_iseq, hl_opcode, MINS_SETL);
+}
+
+void LowLevelCodeGen::hl_cmpgte_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  hl_cmp_to_ll_helper(hl_ins, ll_iseq, hl_opcode, MINS_SETGE);
+}
+
+void LowLevelCodeGen::hl_cmpgt_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  hl_cmp_to_ll_helper(hl_ins, ll_iseq, hl_opcode, MINS_SETG);
+}
+
+void LowLevelCodeGen::hl_cmp_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode comparison) {
+  int size = highlevel_opcode_get_source_operand_size(hl_opcode);
+
+  LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
+  LowLevelOpcode cmp_opcode = select_ll_opcode(MINS_CMPB, size);
+
+  Operand src_left_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
+  Operand src_right_operand = get_ll_operand(hl_ins->get_operand(2), size, ll_iseq);
+  Operand dest_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
+
+  Operand::Kind mreg_kind = select_mreg_kind(size);
+  Operand r10(mreg_kind, MREG_R10);
+
+  ll_iseq->append(new Instruction(mov_opcode, src_left_operand, r10));
+  ll_iseq->append(new Instruction(cmp_opcode, src_right_operand, r10));
+
+  LowLevelOpcode movz_opcode;
+  switch (size) {
+    case 2: 
+      movz_opcode = MINS_MOVZBW; 
+      break;
+    case 4: 
+      movz_opcode = MINS_MOVZBL;
+      break;
+    case 8:
+      movz_opcode = MINS_MOVZBQ;
+      break;
+    case 1:
+    default: 
+      movz_opcode = -1;
+      break;
+  }
+
+  Operand r10b(select_mreg_kind(1), MREG_R10);
+  ll_iseq->append(new Instruction(comparison, r10b));
+
+  if (movz_opcode != -1) {
+    Operand r11(mreg_kind, MREG_R11);
+    ll_iseq->append(new Instruction(movz_opcode, r10b, r11));
+    ll_iseq->append(new Instruction(mov_opcode, r11, dest_operand));
+  } else {
+    ll_iseq->append(new Instruction(mov_opcode, r10b, dest_operand));
+  }
+}
+
+void LowLevelCodeGen::hl_cjmp_t_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  hl_cjmp_to_ll_helper(hl_ins, ll_iseq, hl_opcode, MINS_JNE);
+}
+
+void LowLevelCodeGen::hl_cjmp_f_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  hl_cjmp_to_ll_helper(hl_ins, ll_iseq, hl_opcode, MINS_JE);
+}
+
+void LowLevelCodeGen::hl_cjmp_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode condition) {
+  int size = highlevel_opcode_get_source_operand_size(hl_opcode);
+
+  LowLevelOpcode cmp_opcode = select_ll_opcode(MINS_CMPB, size);
+
+  Operand jmp_label = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
+  Operand cmp_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
+
+  ll_iseq->append(new Instruction(cmp_opcode, Operand(Operand::IMM_IVAL, 0), cmp_operand));
+  ll_iseq->append(new Instruction(condition, jmp_label));
+}
+
+
