@@ -309,6 +309,8 @@ Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_
     return op;
   } 
   // TODO: deal with IMM_label?
+
+  std::cerr << "get ll operand size: " << size << std::endl;
   
   Operand::Kind mreg_kind = select_mreg_kind(size);
   if (op.is_memref())
