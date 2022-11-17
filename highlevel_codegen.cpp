@@ -422,13 +422,17 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
 
   // Add scaled index to pointer
   Operand arr_base = arr->get_address_of_operand();
+
+  // TODO: ADDED
+  if (arr_base.is_memref()) 
+    arr_base = Operand(Operand::VREG, arr_base.get_base_reg());
+
   vreg = next_temp_vreg();
   Operand arr_shifted = Operand(Operand::VREG, vreg);
   m_hl_iseq->append(new Instruction(HINS_add_q, arr_shifted, arr_base, scaled_index));
 
   // Annotate node with mem reference to shifted arr 
-  //n->set_operand(arr_shifted.to_memref());
-  n->set_operand(arr_shifted);
+  n->set_operand(arr_shifted.to_memref());
 }
 
 /**
@@ -581,12 +585,16 @@ void HighLevelCodegen::visit_field_ref_expression(Node *n) {
   Operand offset_op = get_struct_offset(struct_node, field_name);
   // Add offset to struct register
   Operand struct_op = struct_node->get_address_of_operand();
+
+  // TODO: ADDED
+  if (struct_op.is_memref()) 
+    struct_op = Operand(Operand::VREG, struct_op.get_base_reg());
+
   int vreg = next_temp_vreg();
   Operand shifted_field(Operand::VREG, vreg);
   m_hl_iseq->append(new Instruction(HINS_add_q, shifted_field, struct_op, offset_op));
   // Annotate node
-  //n->set_operand(shifted_field.to_memref());
-  n->set_operand(shifted_field);
+  n->set_operand(shifted_field.to_memref());
 }
 
 /**
