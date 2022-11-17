@@ -269,6 +269,12 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
   } else if (match_hl(HINS_cmpgte_b, hl_opcode)) {
     hl_cmpgt_to_ll(hl_ins, ll_iseq, hl_opcode);
     return;
+  } else if (match_hl(HINS_cmpeq_b, hl_opcode)) {
+    hl_cmpeq_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
+  } else if (match_hl(HINS_cmpneq_b, hl_opcode)) {
+    hl_cmpneq_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
   }
 
   // Conditional jumps
@@ -402,6 +408,14 @@ void LowLevelCodeGen::hl_cmpgte_to_ll(Instruction *hl_ins, const std::shared_ptr
 
 void LowLevelCodeGen::hl_cmpgt_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
   hl_cmp_to_ll_helper(hl_ins, ll_iseq, hl_opcode, MINS_SETG);
+}
+
+void LowLevelCodeGen::hl_cmpeq_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  hl_cmp_to_ll_helper(hl_ins, ll_iseq, hl_opcode, MINS_SETE);
+}
+
+void LowLevelCodeGen::hl_cmpneq_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  hl_cmp_to_ll_helper(hl_ins, ll_iseq, hl_opcode, MINS_SETNE);
 }
 
 void LowLevelCodeGen::hl_cmp_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode comparison) {
