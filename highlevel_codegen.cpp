@@ -383,7 +383,6 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
  * index by size of data of array and accessed memory there.
  **/
 void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
-  printf("VISITING ARRAY REF\n");
   Node *arr = n->get_kid(0);
   Node *index = n->get_kid(1);
 
