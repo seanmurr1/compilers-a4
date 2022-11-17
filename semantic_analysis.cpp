@@ -678,8 +678,7 @@ void SemanticAnalysis::visit_function_call_expression(Node *n) {
     if (left_type->is_integral() && right_type->is_integral() && !left_type->is_same(right_type.get())) {
       arg_list->set_kid(i, promote_type(parameter, left_type->get_basic_type_kind(), left_type->is_signed()));
     } 
-    // Annotate parameter
-    arg_list->get_kid(i)->set_type(left_type);
+    // Parameter will already be annotated
   }
   // Annotate function call
   n->set_type(fn_type->get_base_type());
