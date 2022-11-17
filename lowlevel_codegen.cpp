@@ -121,14 +121,14 @@ std::shared_ptr<InstructionSequence> LowLevelCodeGen::translate_hl_to_ll(const s
     m_memory_variable_offset += (16 - (m_memory_variable_offset % 16));
 
   if (m_memory_variable_offset != 0)
-    printf("/* Function \'%s\': placing memory variables at offset -%d from %%rbp */", fn_name, m_memory_variable_offset);
+    printf("/* Function \'%s\': placing memory variables at offset -%d from %%rbp */\n", fn_name.c_str(), m_memory_variable_offset);
 
   int max_temp_vreg = funcdef_ast->get_max_temp_vreg();
   int total_vreg_memory = (max_temp_vreg - 9) * 8;
-  printf("/* Function \'%s\': uses %d total bytes of memory storage for vregs */", fn_name, total_vreg_memory);
+  printf("/* Function \'%s\': uses %d total bytes of memory storage for vregs */\n", fn_name.c_str(), total_vreg_memory);
 
   m_vreg_storage_offset = m_memory_variable_offset + total_vreg_memory;
-    printf("/* Function \'%s\': placing vreg storage at offset -%d from %%rbp */", fn_name, m_vreg_storage_offset);
+    printf("/* Function \'%s\': placing vreg storage at offset -%d from %%rbp */\n", fn_name.c_str(), m_vreg_storage_offset);
 
   // Determine the total number of bytes of memory storage
   // that the function needs. This should include both variables that
@@ -144,7 +144,7 @@ std::shared_ptr<InstructionSequence> LowLevelCodeGen::translate_hl_to_ll(const s
   if ((m_total_memory_storage) % 16 != 0)
     m_total_memory_storage += (16 - (m_total_memory_storage % 16));
 
-  printf("/* Function \'%s\': %d bytes of local storage allocated in stack frame */", fn_name, m_total_memory_storage);
+  printf("/* Function \'%s\': %d bytes of local storage allocated in stack frame */\n", fn_name.c_str(), m_total_memory_storage);
 
   // Iterate through high level instructions
   for (auto i = hl_iseq->cbegin(); i != hl_iseq->cend(); ++i) {
