@@ -69,8 +69,12 @@ const char *lowlevel_opcode_to_str(LowLevelOpcode opcode) {
     return "imulq";
   case MINS_IDIVQ:
     return "idivq";
+  case MINS_IDIVL:
+    return "idivl";
   case MINS_CQTO:
     return "cqto";
+  case MINS_CDQ:
+    return "cdq";
   case MINS_PUSHQ:
     return "pushq";
   case MINS_POPQ:
