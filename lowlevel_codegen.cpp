@@ -261,7 +261,7 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
 // TODO: implement other private member functions
 
 long LowLevelCodeGen::get_stack_offset(int vreg_num) {
-  int base_vreg_num = vreg - 10;
+  int base_vreg_num = vreg_num - 10;
   int offset = m_total_vreg_memory - (base_vreg_num * 8);
   return -1 * offset;
 }
@@ -291,18 +291,18 @@ Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_
       case 6: return Operand(mreg_kind, MREG_R9);
       default:
         // Unreachable
-        return;
+        assert(false);
     }
   }
 
   // Deal with VREG
   int vreg_offset = get_stack_offset(vreg_num);
-  Operand op(Operand::MREG64_MEM_OFF, MREG_RBP, vreg_offset);
+  Operand ll_op(Operand::MREG64_MEM_OFF, MREG_RBP, vreg_offset);
 
   // TODO: deal with memory references to vregisters...
   // Need to generate instructions for this...
 
-  return op;
+  return ll_op;
 }
 
 /**
