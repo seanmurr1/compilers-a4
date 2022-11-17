@@ -9,6 +9,9 @@
 #include "exceptions.h"
 #include "lowlevel_codegen.h"
 
+// TODO REMOVE
+#include <iostream>
+
 namespace {
 
 // This map has some "obvious" translations of high-level opcodes to
@@ -404,7 +407,7 @@ void LowLevelCodeGen::hl_cmpgt_to_ll(Instruction *hl_ins, const std::shared_ptr<
 void LowLevelCodeGen::hl_cmp_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode comparison) {
   int size = highlevel_opcode_get_source_operand_size(hl_opcode);
 
-  printf("CMP SIZE: %d\n", size);
+  std::cerr "cmp size " << size << std::endl;
 
   LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
   LowLevelOpcode cmp_opcode = select_ll_opcode(MINS_CMPB, size);
@@ -460,8 +463,7 @@ void LowLevelCodeGen::hl_cjmp_f_to_ll(Instruction *hl_ins, const std::shared_ptr
 void LowLevelCodeGen::hl_cjmp_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode condition) {
   int size = highlevel_opcode_get_source_operand_size(hl_opcode);
 
-  printf("CJMP SIZE: %d\n", size);
-
+  std::cerr "cjmp size " << size << std::endl;
 
   LowLevelOpcode cmp_opcode = select_ll_opcode(MINS_CMPB, size);
 
