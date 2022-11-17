@@ -469,17 +469,21 @@ void HighLevelCodegen::visit_literal_value(Node *n) {
   const std::string &lexeme = n->get_kid(0)->get_str();
   const Location &loc = n->get_kid(0)->get_loc();
   LiteralValue val;
+  long ival;
 
   if (n->get_kid(0)->get_tag() == TOK_CHAR_LIT) {
     val = LiteralValue::from_char_literal(lexeme, loc);
+    ival = val.get_char_value();
+    
   } else {
     val = LiteralValue::from_int_literal(lexeme, loc);
+    ival = val.get_int_value();
   }
 
   int vreg = next_temp_vreg();
   Operand dest(Operand::VREG, vreg);
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_type());
-  m_hl_iseq->append(new Instruction(mov_opcode, dest, Operand(Operand::IMM_IVAL, val.get_int_value())));
+  m_hl_iseq->append(new Instruction(mov_opcode, dest, Operand(Operand::IMM_IVAL, ival)));
   n->set_operand(dest);
 }
 
