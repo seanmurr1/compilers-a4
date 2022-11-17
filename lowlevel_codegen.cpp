@@ -407,6 +407,8 @@ void LowLevelCodeGen::hl_cmpgt_to_ll(Instruction *hl_ins, const std::shared_ptr<
 void LowLevelCodeGen::hl_cmp_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode comparison) {
   int size = highlevel_opcode_get_source_operand_size(hl_opcode);
 
+  std::cerr << "cmp size: " << size << std::endl;
+
   LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
   LowLevelOpcode cmp_opcode = select_ll_opcode(MINS_CMPB, size);
 
