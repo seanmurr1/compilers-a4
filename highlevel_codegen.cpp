@@ -465,10 +465,16 @@ void HighLevelCodegen::visit_literal_value(Node *n) {
     n->set_operand(dest);
     return;
   }
-  
+
   const std::string &lexeme = n->get_kid(0)->get_str();
   const Location &loc = n->get_kid(0)->get_loc();
-  LiteralValue val = LiteralValue::from_int_literal(lexeme, loc);
+  LiteralValue val;
+
+  if (n->get_kid(0)->get_tag() == TOK_CHAR_LIT) {
+    val = LiteralValue::from_char_literal(lexeme, loc);
+  } else {
+    val = LiteralValue::from_int_literal(lexeme, loc);
+  }
 
   int vreg = next_temp_vreg();
   Operand dest(Operand::VREG, vreg);
