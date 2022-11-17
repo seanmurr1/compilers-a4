@@ -338,6 +338,11 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
     hl_add_to_ll(hl_ins, ll_iseq, hl_opcode);
     return;
   }
+  // sub instruction
+  if (match_hl(HINS_sub_b, hl_opcode)) {
+    hl_sub_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
+  }
   // mul instruction
   if (match_hl(HINS_mul_b, hl_opcode)) {
     hl_mul_to_ll(hl_ins, ll_iseq, hl_opcode);
@@ -360,7 +365,7 @@ Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_
   if (op.is_imm_ival() || op.is_label() || op.is_imm_label()) {
     return op;
   } 
-    
+
   int vreg_num = op.get_base_reg();
 
   // Check for reserved registers
@@ -461,6 +466,28 @@ void LowLevelCodeGen::hl_add_to_ll(Instruction *hl_ins, const std::shared_ptr<In
 
   ll_iseq->append(new Instruction(mov_opcode, src_left_operand, r10));
   ll_iseq->append(new Instruction(add_opcode, src_right_operand, r10));
+  ll_iseq->append(new Instruction(mov_opcode, r10, dest_operand));
+}
+
+/**
+ * Translates HL sub instruction to LL.
+ **/
+// TODO: consolidate into helper method with add
+void LowLevelCodeGen::hl_sub_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  int size = highlevel_opcode_get_source_operand_size(hl_opcode);
+
+  LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
+  LowLevelOpcode sub_opcode = select_ll_opcode(MINS_SUBB, size);
+
+  Operand src_left_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
+  Operand src_right_operand = get_ll_operand(hl_ins->get_operand(2), size, ll_iseq);
+  Operand dest_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
+
+  Operand::Kind mreg_kind = select_mreg_kind(size);
+  Operand r10(mreg_kind, MREG_R10);
+
+  ll_iseq->append(new Instruction(mov_opcode, src_left_operand, r10));
+  ll_iseq->append(new Instruction(sub_opcode, src_right_operand, r10));
   ll_iseq->append(new Instruction(mov_opcode, r10, dest_operand));
 }
 

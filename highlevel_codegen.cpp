@@ -371,7 +371,6 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
     return;
   }
 
-
   int vreg = next_temp_vreg();
   Operand return_val(Operand::VREG, vreg);
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_type());
