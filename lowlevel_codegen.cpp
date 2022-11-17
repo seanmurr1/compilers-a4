@@ -310,7 +310,7 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
   } else if (hl_opcode == HINS_sconv_wl || hl_opcode == HINS_uconv_wl) {
     hl_conv_to_ll_helper(hl_ins, ll_iseq, hl_opcode, 2, 4);
     return;
-  } else if (hl_opcode == HINS_sconv_wq|| hl_opcode == HINS_uconv_wql) {
+  } else if (hl_opcode == HINS_sconv_wq|| hl_opcode == HINS_uconv_wq) {
     hl_conv_to_ll_helper(hl_ins, ll_iseq, hl_opcode, 2, 8);
     return;
   } else if (hl_opcode == HINS_sconv_lq || hl_opcode == HINS_uconv_lq) {
