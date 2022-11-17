@@ -427,7 +427,8 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
   m_hl_iseq->append(new Instruction(HINS_add_q, arr_shifted, arr_base, scaled_index));
 
   // Annotate node with mem reference to shifted arr 
-  n->set_operand(arr_shifted.to_memref());
+  //n->set_operand(arr_shifted.to_memref());
+  n->set_operand(arr_shifted;
 }
 
 /**
@@ -580,12 +581,12 @@ void HighLevelCodegen::visit_field_ref_expression(Node *n) {
   Operand offset_op = get_struct_offset(struct_node, field_name);
   // Add offset to struct register
   Operand struct_op = struct_node->get_address_of_operand();
-  assert (!struct_op.is_memref());
   int vreg = next_temp_vreg();
   Operand shifted_field(Operand::VREG, vreg);
   m_hl_iseq->append(new Instruction(HINS_add_q, shifted_field, struct_op, offset_op));
   // Annotate node
-  n->set_operand(shifted_field.to_memref());
+  //n->set_operand(shifted_field.to_memref());
+  n->set_operand(shifted_field;
 }
 
 /**
