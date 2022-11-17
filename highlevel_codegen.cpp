@@ -428,7 +428,7 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
 
   // Annotate node with mem reference to shifted arr 
   //n->set_operand(arr_shifted.to_memref());
-  n->set_operand(arr_shifted;
+  n->set_operand(arr_shifted);
 }
 
 /**
@@ -586,7 +586,7 @@ void HighLevelCodegen::visit_field_ref_expression(Node *n) {
   m_hl_iseq->append(new Instruction(HINS_add_q, shifted_field, struct_op, offset_op));
   // Annotate node
   //n->set_operand(shifted_field.to_memref());
-  n->set_operand(shifted_field;
+  n->set_operand(shifted_field);
 }
 
 /**
