@@ -452,7 +452,14 @@ void HighLevelCodegen::visit_literal_value(Node *n) {
   // A partial implementation (note that this won't work correctly
   // for string constants!):
 
-  // TODO: add logic for string constants
+  // String literal
+  if (n->get_kid(0)->get_tag() == TOK_STR_LIT) {
+    std::string str_identifier = "_str" + std::to_string(m_next_str_identifier++);
+    std::string str = n->get_kid(0)->get_str(); 
+    Operand str_op(Operand::IMM_LABEL, str_identifier);
+    n->set_operand(str_op);
+    return;
+  }
   
   const std::string &lexeme = n->get_kid(0)->get_str();
   const Location &loc = n->get_kid(0)->get_loc();

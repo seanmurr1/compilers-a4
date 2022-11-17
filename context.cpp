@@ -128,9 +128,12 @@ void Context::analyze() {
 
 void Context::collect_ast_string_constants(Node *n, ModuleCollector *module_collector) {
   int tag = n->get_tag();
-  if (tag == TOK_STR_LIT) {
+  if (tag == AST_LITERAL_VALUE) {
+    if (n->get_kid(0)->get_tag() != TOK_STR_LIT) return;
     // TODO
-    module_collector->collect_string_constant("", "");
+    std::string str_identifier = n->get_operand().get_label();
+    std::string str = n->get_kid(0)->get_str();
+    module_collector->collect_string_constant(str_identifier, str);
   } else {
     for (auto i = n->cbegin(); i != n->cend(); i++) {
       Node *child = *i;
@@ -157,6 +160,7 @@ void Context::highlevel_codegen(ModuleCollector *module_collector) {
   // TODO: find all of the string constants in the AST
   //       and call the ModuleCollector's collect_string_constant
   //       member function for each one
+  collect_ast_string_constants(m_ast, module_collector);
 
   // collect all of the global variables
   SymbolTable *globals = m_sema.get_global_symtab();
