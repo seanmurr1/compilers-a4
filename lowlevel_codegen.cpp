@@ -418,6 +418,7 @@ void LowLevelCodeGen::hl_cmp_to_ll_helper(Instruction *hl_ins, const std::shared
   ll_iseq->append(new Instruction(cmp_opcode, src_right_operand, r10));
 
   LowLevelOpcode movz_opcode;
+  bool do_movz = true;
   switch (size) {
     case 2: 
       movz_opcode = MINS_MOVZBW; 
@@ -430,14 +431,14 @@ void LowLevelCodeGen::hl_cmp_to_ll_helper(Instruction *hl_ins, const std::shared
       break;
     case 1:
     default: 
-      movz_opcode = -1;
+      do_movz = false;
       break;
   }
 
   Operand r10b(select_mreg_kind(1), MREG_R10);
   ll_iseq->append(new Instruction(comparison, r10b));
 
-  if (movz_opcode != -1) {
+  if (do_movz) {
     Operand r11(mreg_kind, MREG_R11);
     ll_iseq->append(new Instruction(movz_opcode, r10b, r11));
     ll_iseq->append(new Instruction(mov_opcode, r11, dest_operand));

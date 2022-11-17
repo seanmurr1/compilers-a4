@@ -34,9 +34,9 @@ private:
   void hl_cmpgt_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode);
   void hl_cmp_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode comparison);
 
-  void LowLevelCodeGen::hl_cjmp_t_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode);
-  void LowLevelCodeGen::hl_cjmp_f_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode);
-  void LowLevelCodeGen::hl_cjmp_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode condition);
+  void hl_cjmp_t_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode);
+  void hl_cjmp_f_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode);
+  void hl_cjmp_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode condition);
 
   long get_stack_offset(int vreg_num);
 
