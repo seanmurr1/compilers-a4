@@ -588,6 +588,11 @@ void HighLevelCodegen::visit_indirect_field_ref_expression(Node *n) {
   visit_field_ref_expression(n);
 }
 
+void visit_implicit_conversion(Node *n) {
+  printf("Visiting conversion!\n");
+}
+
+
 /**
  * Generates next label in format .L{next_label_num}.
  **/

@@ -42,6 +42,8 @@ public:
   virtual void visit_field_ref_expression(Node *n);
   virtual void visit_indirect_field_ref_expression(Node *n);
 
+  virtual void visit_implicit_conversion(Node *n);
+
 private:
   std::string next_label();
 
