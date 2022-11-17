@@ -129,11 +129,9 @@ void Context::analyze() {
 
 void Context::collect_ast_string_constants(Node *n, ModuleCollector *module_collector) {
   int tag = n->get_tag();
-  if (tag == AST_LITERAL_VALUE) {
-    if (n->get_kid(0)->get_tag() != TOK_STR_LIT) return;
-    // TODO
+  if (tag == TOK_STR_LIT) {
     std::string str_identifier = "_str" + std::to_string(m_next_str_identifier++);
-    std::string str = n->get_kid(0)->get_str();
+    std::string str = n->get_str();
     str = str.substr(1, str.size() - 2); 
     module_collector->collect_string_constant(str_identifier, str);
     Operand str_op(Operand::IMM_LABEL, str_identifier);

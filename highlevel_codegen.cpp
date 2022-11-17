@@ -453,7 +453,13 @@ void HighLevelCodegen::visit_literal_value(Node *n) {
   // for string constants!):
 
   // String literal, already dealt with in module collector
-  if (n->get_kid(0)->get_tag() == TOK_STR_LIT) return;
+  if (n->get_kid(0)->get_tag() == TOK_STR_LIT) {
+    int vreg = next_temp_vreg();
+    Operand dest(Operand::VREG, vreg);
+    m_hl_iseq->append(new Instruction(HINS_mov_q, dest, n->get_kid(0)->get_operand()));
+    n->set_operand(dest);
+    return;
+  }
   
   const std::string &lexeme = n->get_kid(0)->get_str();
   const Location &loc = n->get_kid(0)->get_loc();
