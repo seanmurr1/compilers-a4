@@ -463,7 +463,7 @@ void LowLevelCodeGen::hl_cjmp_to_ll_helper(Instruction *hl_ins, const std::share
 
   // TODO: this should be fine
   //LowLevelOpcode cmp_opcode = select_ll_opcode(MINS_CMPB, size);
-  LowLevelOpCode cmp_opcode = MINS_CMPL;
+  LowLevelOpcode cmp_opcode = MINS_CMPL;
 
   Operand jmp_label = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
   Operand cmp_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
