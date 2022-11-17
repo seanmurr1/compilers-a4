@@ -335,7 +335,9 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
   for (auto i = arg_list->cbegin(); i != arg_list->cend(); i++) {
     Node *arg = *i;
     visit(arg);
-    Operand arg_op = arg->get_operand();
+    //Operand arg_op = arg->get_operand();
+    Operand arg_op = arg->get_address_of_operand();
+    // CHANGING!!!!
     Operand arg_reg = Operand(Operand::VREG, arg_reg_index);
     HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, arg->get_type());
     m_hl_iseq->append(new Instruction(mov_opcode, arg_reg, arg_op));
