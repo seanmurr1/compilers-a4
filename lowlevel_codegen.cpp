@@ -345,8 +345,6 @@ Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_
 void LowLevelCodeGen::hl_mov_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
   int size = highlevel_opcode_get_source_operand_size(hl_opcode);
 
-  printf("MOV\n");
-
   LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
 
   Operand src_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
@@ -460,9 +458,7 @@ void LowLevelCodeGen::hl_cjmp_f_to_ll(Instruction *hl_ins, const std::shared_ptr
 void LowLevelCodeGen::hl_cjmp_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode condition) {
   int size = highlevel_opcode_get_source_operand_size(hl_opcode);
 
-  printf("here1\n");
   LowLevelOpcode cmp_opcode = select_ll_opcode(MINS_CMPB, size);
-  printf("here2\n");
 
   Operand jmp_label = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
   Operand cmp_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
