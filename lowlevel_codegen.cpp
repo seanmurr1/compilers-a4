@@ -600,7 +600,7 @@ void LowLevelCodeGen::hl_localaddr_to_ll(Instruction *hl_ins, const std::shared_
   Operand::Kind mreg_kind = select_mreg_kind(8);
   Operand r10(mreg_kind, MREG_R10);
 
-  int mem_offset = m_memory_variable_offset - offset_op.get_imm_ival();
+  int mem_offset = -1 * (m_memory_variable_offset - offset_op.get_imm_ival());
 
   Operand mem_var(Operand::MREG64_MEM_OFF, MREG_RBP, mem_offset);
 
