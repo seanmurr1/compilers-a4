@@ -295,13 +295,27 @@ void SemanticAnalysis::process_function_parameters(Node *parameter_list, std::ve
  * with its function return type.
  **/
 void SemanticAnalysis::visit_return_expression_statement(Node *n) {
+  const Location &loc = n->get_loc();
+  std::shared_ptr<Type> fn_return_type = m_cur_function->get_base_type();
+  
+  // Check for void function
+  if (n->get_num_kids() == 0 && m_cur_function->get_base_type()->get_basic_type_kind() == BasicTypeKind::VOID) {
+    return;
+  } else if (n->get_num_kids() == 0) {
+    SemanticError::raise(loc, "Mismatch in function return type");
+  }
+
   // Visit return expression
   visit(n->get_kid(0));
   // Get expression type
   std::shared_ptr<Type> return_type = n->get_kid(0)->get_type();
   // Check if return type can be casted/assigned to function return type
-  const Location &loc = n->get_loc();
-  check_assignment(m_cur_function->get_base_type(), return_type, loc);
+  check_assignment(fn_return_type, return_type, loc);
+
+  // Promote type if needed
+  if (return_type->is_integral() && fn_return_type->is_integral() && !return_type->is_same(fn_return_type.get())) {
+    n->set_kid(0, promote_type(n->get_kid(0), fn_return_type->get_basic_type_kind(), fn_return_type->is_signed()));
+  }
 }
 
 /**
