@@ -281,7 +281,7 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
   } else if (match_hl(HINS_cmpgte_b, hl_opcode)) {
     hl_cmpgte_to_ll(hl_ins, ll_iseq, hl_opcode);
     return;
-  } else if (match_hl(HINS_cmpgte_b, hl_opcode)) {
+  } else if (match_hl(HINS_cmpgt_b, hl_opcode)) {
     hl_cmpgt_to_ll(hl_ins, ll_iseq, hl_opcode);
     return;
   } else if (match_hl(HINS_cmpeq_b, hl_opcode)) {
