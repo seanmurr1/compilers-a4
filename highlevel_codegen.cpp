@@ -588,7 +588,7 @@ void HighLevelCodegen::visit_indirect_field_ref_expression(Node *n) {
   visit_field_ref_expression(n);
 }
 
-void visit_implicit_conversion(Node *n) {
+void HighLevelCodegen::visit_implicit_conversion(Node *n) {
   printf("Visiting conversion!\n");
 }
 
