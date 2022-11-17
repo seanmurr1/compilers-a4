@@ -580,6 +580,7 @@ void HighLevelCodegen::visit_field_ref_expression(Node *n) {
   Operand offset_op = get_struct_offset(struct_node, field_name);
   // Add offset to struct register
   Operand struct_op = struct_node->get_address_of_operand();
+  assert (!struct_op.is_memref());
   int vreg = next_temp_vreg();
   Operand shifted_field(Operand::VREG, vreg);
   m_hl_iseq->append(new Instruction(HINS_add_q, shifted_field, struct_op, offset_op));
