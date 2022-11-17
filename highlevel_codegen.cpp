@@ -367,6 +367,11 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
   m_hl_iseq->append(new Instruction(HINS_call, Operand(Operand::LABEL, fn_name)));
 
   // Annotate node with return value in vr0
+  if (n->get_symbol()->get_type()->get_base_type()->get_basic_type_kind() == BasicTypeKind::VOID) {
+    printf("FOUND VOID\n");
+  }
+
+
   int vreg = next_temp_vreg();
   Operand return_val(Operand::VREG, vreg);
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_type());
