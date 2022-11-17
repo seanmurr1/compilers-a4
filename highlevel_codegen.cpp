@@ -368,7 +368,7 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
 
   // Annotate node with return value in vr0
   if (n->get_type()->get_basic_type_kind() == BasicTypeKind::VOID) {
-    printf("FOUND VOID\n");
+    return;
   }
 
 
