@@ -130,6 +130,7 @@ void HighLevelCodegen::visit_return_statement(Node *n) {
 
 // Generate code to evaluate return expression.
 void HighLevelCodegen::visit_return_expression_statement(Node *n) {
+  printf("Before return exprssion visit\n");
   Node *expr = n->get_kid(0);
 
   // generate code to evaluate the expression
