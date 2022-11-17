@@ -14,7 +14,6 @@ private:
   std::shared_ptr<InstructionSequence> m_hl_iseq;
   int m_next_temp_vreg;
   int m_max_temp_vreg;
-  int m_next_str_identifier;
 
 public:
   // the next_label_num controls where the next_label() member function

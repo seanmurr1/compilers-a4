@@ -35,6 +35,8 @@ private:
   Node *m_ast;
   SemanticAnalysis m_sema;
 
+  int m_next_str_identifier;
+
   // copy ctor and assignment operator not allowed
   Context(const Context &);
   Context &operator=(const Context &);
