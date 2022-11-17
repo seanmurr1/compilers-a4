@@ -85,7 +85,7 @@ void HighLevelCodegen::visit_function_definition(Node *n) {
   // Starting temp vreg #
   m_next_temp_vreg = fn_sym->get_vreg();
   // Starting max temp vreg # used 
-  m_max_temp_vreg = m_max_temp_vreg - 1;
+  m_max_temp_vreg = m_next_temp_vreg - 1;
 
   m_hl_iseq->append(new Instruction(HINS_enter, Operand(Operand::IMM_IVAL, total_local_storage)));
 
