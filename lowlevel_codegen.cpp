@@ -345,6 +345,8 @@ Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_
 void LowLevelCodeGen::hl_mov_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
   int size = highlevel_opcode_get_source_operand_size(hl_opcode);
 
+  printf("MOV\n");
+
   LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
 
   Operand src_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
