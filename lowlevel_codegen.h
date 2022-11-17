@@ -12,6 +12,8 @@ private:
   int m_total_memory_storage;
   bool m_optimize;
 
+  int m_total_vreg_memory;
+
 public:
   LowLevelCodeGen(bool optimize);
   virtual ~LowLevelCodeGen();
@@ -22,6 +24,14 @@ private:
   std::shared_ptr<InstructionSequence> translate_hl_to_ll(const std::shared_ptr<InstructionSequence> &hl_iseq);
   void translate_instruction(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq);
   Operand get_ll_operand(Operand hl_opcode, int size, const std::shared_ptr<InstructionSequence> &ll_iseq);
+
+  void hl_mov_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode);
+  void hl_add_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode);
+
+  Operand get_ll_operand(Operand op, int size, const std::shared_ptr<InstructionSequence> &ll_iseq);
+
+  long get_stack_offset(int vreg_num);
+
 };
 
 #endif // LOWLEVEL_CODEGEN_H

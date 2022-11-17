@@ -61,6 +61,10 @@ void HighLevelCodegen::process_parameter(Node *declarator, int register_index) {
  **/
 int HighLevelCodegen::next_temp_vreg() {
   int temp_vreg = m_next_temp_vreg;
+  
+  if (temp_vreg > m_max_temp_vreg)
+    m_max_temp_vreg = temp_vreg;
+
   m_next_temp_vreg++;
   return temp_vreg;
 }
@@ -80,6 +84,8 @@ void HighLevelCodegen::visit_function_definition(Node *n) {
   
   // Starting temp vreg #
   m_next_temp_vreg = fn_sym->get_vreg();
+  // Starting max temp vreg # used 
+  m_max_temp_vreg = m_max_temp_vreg - 1;
 
   m_hl_iseq->append(new Instruction(HINS_enter, Operand(Operand::IMM_IVAL, total_local_storage)));
 
@@ -98,6 +104,9 @@ void HighLevelCodegen::visit_function_definition(Node *n) {
   m_hl_iseq->define_label(m_return_label_name);
   m_hl_iseq->append(new Instruction(HINS_leave, Operand(Operand::IMM_IVAL, total_local_storage)));
   m_hl_iseq->append(new Instruction(HINS_ret));
+
+  // Set max temp vreg info for function node
+  n->set_max_temp_vreg(m_max_temp_vreg);
 }
 
 /**

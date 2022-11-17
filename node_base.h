@@ -40,6 +40,8 @@ private:
   // Operand associated with node
   Operand m_op;
 
+  int m_max_temp_vreg;
+
   // copy ctor and assignment operator not supported
   NodeBase(const NodeBase &);
   NodeBase &operator=(const NodeBase &);
@@ -57,6 +59,9 @@ public:
   void set_operand(Operand op);
   Operand get_operand() const;
   Operand get_address_of_operand() const;
+
+  void set_max_temp_vreg(int vreg) { m_max_temp_vreg = vreg; }
+  int get_max_temp_vreg() const { return m_max_temp_vreg; }
 };
 
 #endif // NODE_BASE_H

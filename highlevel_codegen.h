@@ -13,6 +13,7 @@ private:
   std::string m_return_label_name; // name of the label that return instructions should target
   std::shared_ptr<InstructionSequence> m_hl_iseq;
   int m_next_temp_vreg;
+  int m_max_temp_vreg;
 
 public:
   // the next_label_num controls where the next_label() member function

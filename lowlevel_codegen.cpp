@@ -111,12 +111,19 @@ std::shared_ptr<InstructionSequence> LowLevelCodeGen::translate_hl_to_ll(const s
   // optimization passes.
   ll_iseq->set_funcdef_ast(funcdef_ast);
 
+  int max_temp_vreg = funcdef_ast->get_max_temp_vreg();
+  m_total_vreg_memory = (max_temp_vreg - 9) * 8;
+
   // Determine the total number of bytes of memory storage
   // that the function needs. This should include both variables that
   // *must* have storage allocated in memory (e.g., arrays), and also
   // any additional memory that is needed for virtual registers,
   // spilled machine registers, etc.
-  m_total_memory_storage = 120; // FIXME: determine how much memory storage on the stack is needed
+  //m_total_memory_storage = 120; // FIXME: determine how much memory storage on the stack is needed
+  
+  m_total_memory_storage = m_total_vreg_memory; 
+
+
 
   // The function prologue will push %rbp, which should guarantee that the
   // stack pointer (%rsp) will contain an address that is a multiple of 16.
@@ -234,7 +241,112 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
   // for choosing the appropriate low-level instructions and
   // machine register operands.
 
+  if (hl_opcode == HINS_jmp) {
+    ll_iseq->append(new Instruction(MINS_JMP, hl_ins->get_operand(0)));
+    return;
+  }
+
+  if (match_hl(HINS_mov_b, hl_opcode)) {
+    hl_mov_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
+  }
+  if (match_hl(HINS_add_b, hl_opcode)) {
+    hl_add_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
+  }
+
   RuntimeError::raise("high level opcode %d not handled", int(hl_opcode));
 }
 
 // TODO: implement other private member functions
+
+long LowLevelCodeGen::get_stack_offset(int vreg_num) {
+  int base_vreg_num = vreg - 10;
+  int offset = m_total_vreg_memory - (base_vreg_num * 8);
+  return -1 * offset;
+}
+
+Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_ptr<InstructionSequence> &ll_iseq) {
+  // Check for immediate value
+  if (op.is_imm_ival()) {
+    return op;
+  }
+  // TODO: deal with IMM_label?
+  
+  Operand::Kind mreg_kind = select_mreg_kind(size);
+  if (op.is_memref())
+    mreg_kind = Operand::MREG64_MEM;
+
+  int vreg_num = op.get_base_reg();
+
+  // Check for reserved registers
+  if (vreg_num < 7) {
+    switch (vreg_num) {
+      case 0: return Operand(mreg_kind, MREG_RAX);
+      case 1: return Operand(mreg_kind, MREG_RDI);
+      case 2: return Operand(mreg_kind, MREG_RSI);
+      case 3: return Operand(mreg_kind, MREG_RDX);
+      case 4: return Operand(mreg_kind, MREG_RCX);
+      case 5: return Operand(mreg_kind, MREG_R8);
+      case 6: return Operand(mreg_kind, MREG_R9);
+      default:
+        // Unreachable
+        return;
+    }
+  }
+
+  // Deal with VREG
+  int vreg_offset = get_stack_offset(vreg_num);
+  Operand op(Operand::MREG64_MEM_OFF, MREG_RBP, vreg_offset);
+
+  // TODO: deal with memory references to vregisters...
+  // Need to generate instructions for this...
+
+  return op;
+}
+
+/**
+ * Translates HL mov instruction to LL.
+ **/
+void LowLevelCodeGen::hl_mov_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  int size = highlevel_opcode_get_source_operand_size(hl_opcode);
+
+  LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
+
+  Operand src_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
+  Operand dest_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
+
+  if (src_operand.is_memref() && dest_operand.is_memref()) {
+    // Move source operand into temporary register
+    Operand::Kind mreg_kind = select_mreg_kind(size);
+    Operand r10(mreg_kind, MREG_R10);
+    ll_iseq->append(new Instruction(mov_opcode, src_operand, r10));
+    src_operand = r10;
+  }
+
+  ll_iseq->append(new Instruction(mov_opcode, src_operand, dest_operand));
+}
+
+/**
+ * Translates HL add instruction to LL.
+ **/
+void LowLevelCodeGen::hl_add_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  int size = highlevel_opcode_get_source_operand_size(hl_opcode);
+
+  LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
+  LowLevelOpcode add_opcode = select_ll_opcode(MINS_ADDB, size);
+
+  Operand src_left_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
+  Operand src_right_operand = get_ll_operand(hl_ins->get_operand(2), size, ll_iseq);
+  Operand dest_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
+
+  // TODO: deal with moving into temp register if two or more are mem refs?????
+  // I dont think this is necessary with the use of r10 as a helper here...
+
+  Operand::Kind mreg_kind = select_mreg_kind(size);
+  Operand r10(mreg_kind, MREG_R10);
+
+  ll_iseq->append(new Instruction(mov_opcode, src_left_operand, r10));
+  ll_iseq->append(new Instruction(add_opcode, src_right_operand, r10));
+  ll_iseq->append(new Instruction(mov_opcode, r10, dest_operand));
+}
