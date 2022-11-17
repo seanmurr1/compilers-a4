@@ -348,6 +348,16 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
     hl_mul_to_ll(hl_ins, ll_iseq, hl_opcode);
     return;
   }
+  // div instruction
+  if (match_hl(HINS_div_b, hl_opcode)) {
+    hl_div_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
+  }
+  // mod instruction
+  if (match_hl(HINS_mod_b, hl_opcode)) {
+    hl_mod_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
+  }
 
   /* Unary. */
 
@@ -670,5 +680,72 @@ void LowLevelCodeGen::hl_neg_to_ll(Instruction *hl_ins, const std::shared_ptr<In
   ll_iseq->append(new Instruction(mov_opcode, src_operand, r10));
   ll_iseq->append(new Instruction(mov_opcode, Operand(Operand::IMM_IVAL, 0), dest_operand));
   ll_iseq->append(new Instruction(sub_opcode, r10, dest_operand));
+}
 
+void LowLevelCodeGen::hl_div_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  int size = highlevel_opcode_get_source_operand_size(hl_opcode);
+
+  LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
+
+  Operand src_left_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
+  Operand src_right_operand = get_ll_operand(hl_ins->get_operand(2), size, ll_iseq);
+  Operand dest_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
+
+  Operand::Kind mreg_kind = select_mreg_kind(size);
+  Operand rax(mreg_kind, MREG_RAX);
+  Operand r10(mreg_kind, MREG_R10);
+
+  ll_iseq->append(new Instruction(mov_opcode, src_left_operand, rax));
+
+  if (size < 8) {
+    ll_iseq->append(new Instruction(MINS_CDQ));
+  } else {
+    ll_iseq->append(new Instruction(MINS_CQTO));
+  }
+
+  ll_iseq->append(new Instruction(mov_opcode, src_right_operand, r10));
+
+  if (size < 8) {
+    ll_iseq->append(new Instruction(MINS_IDIVL, r10));
+  } else {
+    ll_iseq->append(new Instruction(MINS_IDIVQ, r10));
+  }
+
+  ll_iseq->append(new Instruction(mov_opcode, rax, dest_operand));
+}
+
+
+void LowLevelCodeGen::hl_mod_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  // TODO refactor
+  int size = highlevel_opcode_get_source_operand_size(hl_opcode);
+
+  LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
+
+  Operand src_left_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
+  Operand src_right_operand = get_ll_operand(hl_ins->get_operand(2), size, ll_iseq);
+  Operand dest_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
+
+  Operand::Kind mreg_kind = select_mreg_kind(size);
+  Operand rax(mreg_kind, MREG_RAX);
+  Operand r10(mreg_kind, MREG_R10);
+
+  ll_iseq->append(new Instruction(mov_opcode, src_left_operand, rax));
+
+  if (size < 8) {
+    ll_iseq->append(new Instruction(MINS_CDQ));
+  } else {
+    ll_iseq->append(new Instruction(MINS_CQTO));
+  }
+
+  ll_iseq->append(new Instruction(mov_opcode, src_right_operand, r10));
+
+  if (size < 8) {
+    ll_iseq->append(new Instruction(MINS_IDIVL, r10));
+  } else {
+    ll_iseq->append(new Instruction(MINS_IDIVQ, r10));
+  }
+
+  Operand rdx(mreg_kind, MREG_RDX);
+
+  ll_iseq->append(new Instruction(mov_opcode, rdx, dest_operand));
 }
