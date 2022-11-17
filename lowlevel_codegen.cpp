@@ -117,8 +117,8 @@ std::shared_ptr<InstructionSequence> LowLevelCodeGen::translate_hl_to_ll(const s
   const std::string &fn_name = funcdef_ast->get_kid(1)->get_str();
 
   m_memory_variable_offset = funcdef_ast->get_symbol()->get_offset();
-  if (m_memory_variable_offset % 16 != 0)
-    m_memory_variable_offset += (16 - (m_memory_variable_offset % 16));
+  if (m_memory_variable_offset % 8 != 0)
+    m_memory_variable_offset += (8 - (m_memory_variable_offset % 8));
 
   if (m_memory_variable_offset != 0)
     printf("/* Function \'%s\': placing memory variables at offset -%d from %%rbp */\n", fn_name.c_str(), m_memory_variable_offset);
@@ -219,6 +219,10 @@ Operand::Kind select_mreg_kind(int operand_size) {
 }
 
 void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq) {
+  // Reset helper registers
+  m_r10_in_use = false;
+  m_r11_in_use = false;
+  
   HighLevelOpcode hl_opcode = HighLevelOpcode(hl_ins->get_opcode());
 
   if (hl_opcode == HINS_enter) {
@@ -390,13 +394,25 @@ Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_
   if (op.is_memref()) {
     // TODO: This is wrong
 
+    MachineReg reg;
+    if (m_r11_in_use && m_r10_in_use) {
+      assert(false);
+    } else if (m_r11_in_use) {
+      reg = MREG_R10;
+      m_r10_in_use = true;
+    } else {
+      reg = MREG_R11;
+      m_r11_in_use = true;
+    }
 
-    Operand::Kind r11_mreg_kind = select_mreg_kind(8);
-    Operand r11(r11_mreg_kind, MREG_R11);
+    Operand::Kind mreg_kind = select_mreg_kind(8);
+    Operand reg_op(mreg_kind, reg);
 
-    ll_iseq->append(new Instruction(MINS_MOVQ, ll_op, r11));
+    // TODO: make MOV relate to size parameter... or not??
+    // TODO, track use of r11 and r10...
+    ll_iseq->append(new Instruction(MINS_MOVQ, ll_op, reg_op));
 
-    Operand ref(Operand::MREG64_MEM, MREG_R11);
+    Operand ref(Operand::MREG64_MEM, reg);
     return ref;
   }
 

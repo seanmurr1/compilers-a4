@@ -16,6 +16,9 @@ private:
   int m_memory_variable_offset;
   int m_vreg_storage_offset;
 
+  bool m_r10_in_use;
+  bool m_r11_in_use;
+
 public:
   LowLevelCodeGen(bool optimize);
   virtual ~LowLevelCodeGen();
