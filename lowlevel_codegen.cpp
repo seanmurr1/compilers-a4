@@ -397,7 +397,7 @@ Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_
     LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
 
     Operand::Kind mreg_kind = select_mreg_kind(size);
-    Operand r10(rmreg_kind, MREG_R10);
+    Operand r10(mreg_kind, MREG_R10);
 
     ll_iseq->append(new Instruction(mov_opcode, ref, r10));
     ll_op = r10;
