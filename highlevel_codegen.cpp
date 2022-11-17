@@ -304,8 +304,26 @@ void HighLevelCodegen::generate_non_assignment(Node *n, int binary_op) {
   }
 
   opcode = get_opcode(opcode, n->get_kid(1)->get_type());
-  m_hl_iseq->append(new Instruction(opcode, dest, left, right));
-  n->set_operand(dest);
+
+  // TODO: ADDED THIS CHANGE/FIX
+  if (left.is_memref() && right.is_memref()) {
+    HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_kid(1)->get_type());
+    
+    vreg = next_temp_vreg();
+    Operand temp_left_op(Operand::VREG, vreg);
+
+    m_hl_iseq->append(new Instruction(mov_opcode, temp_left_op, left));
+
+    vreg = next_temp_vreg();
+    Operand temp_right_op(Operand::VREG, vreg);
+    m_hl_iseq->append(new Instruction(mov_opcode, temp_right_op, right));
+
+    m_hl_iseq->append(new Instruction(opcode, dest, temp_left_op, temp_right_op));
+  } else {
+    m_hl_iseq->append(new Instruction(opcode, dest, left, right));
+  }
+
+  n->set_operand(dest);  
 }
 
 /**
