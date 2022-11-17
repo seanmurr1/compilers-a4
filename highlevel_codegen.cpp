@@ -595,7 +595,6 @@ void HighLevelCodegen::visit_implicit_conversion(Node *n) {
 
   BasicTypeKind prev_type = prev->get_type()->get_basic_type_kind();
   BasicTypeKind new_type = n->get_type()->get_basic_type_kind();
-  bool signed = n->get_type()->is_signed();
 
   // Case: truncation
   if (prev_type >= new_type) {
