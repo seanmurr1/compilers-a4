@@ -589,7 +589,58 @@ void HighLevelCodegen::visit_indirect_field_ref_expression(Node *n) {
 }
 
 void HighLevelCodegen::visit_implicit_conversion(Node *n) {
-  printf("Visiting conversion!\n");
+  // Visit child
+  Node *prev = n->get_kid(0);
+  visit(prev);
+
+  BasicTypeKind prev_type = prev->get_type()->get_basic_type_kind();
+  BasicTypeKind new_type = n->get_type()->get_basic_type_kind();
+  bool signed = n->get_type()->is_signed();
+
+  // Case: truncation
+  if (prev_type >= new_type) {
+    // Just annotate with same vreg
+    n->set_operand(prev->get_operand());
+    return;
+  }
+
+  int vreg = next_temp_vreg();
+  Operand converted(Operand::VREG, vreg);
+  HighLevelOpcode conv_opcode;
+
+  // Get conversion opcode
+  if (n->get_type()->is_signed()) {
+    if (prev->get_type()->get_basic_type_kind() == BasicTypeKind::CHAR && n->get_type()->get_basic_type_kind() == BasicTypeKind::SHORT) {
+      conv_opcode = HINS_sconv_bw;
+    } else if (prev->get_type()->get_basic_type_kind() == BasicTypeKind::CHAR && n->get_type()->get_basic_type_kind() == BasicTypeKind::INT) {
+      conv_opcode = HINS_sconv_bl;
+    } else if (prev->get_type()->get_basic_type_kind() == BasicTypeKind::CHAR && n->get_type()->get_basic_type_kind() == BasicTypeKind::LONG) {
+      conv_opcode = HINS_sconv_bq;
+    } else if (prev->get_type()->get_basic_type_kind() == BasicTypeKind::SHORT && n->get_type()->get_basic_type_kind() == BasicTypeKind::INT) {
+      conv_opcode = HINS_sconv_wl;
+    } else if (prev->get_type()->get_basic_type_kind() == BasicTypeKind::SHORT && n->get_type()->get_basic_type_kind() == BasicTypeKind::LONG) {
+      conv_opcode = HINS_sconv_wq;
+    } else if (prev->get_type()->get_basic_type_kind() == BasicTypeKind::INT && n->get_type()->get_basic_type_kind() == BasicTypeKind::LONG) {
+      conv_opcode = HINS_sconv_lq;
+    } 
+  } else {
+    if (prev->get_type()->get_basic_type_kind() == BasicTypeKind::CHAR && n->get_type()->get_basic_type_kind() == BasicTypeKind::SHORT) {
+      conv_opcode = HINS_uconv_bw;
+    } else if (prev->get_type()->get_basic_type_kind() == BasicTypeKind::CHAR && n->get_type()->get_basic_type_kind() == BasicTypeKind::INT) {
+      conv_opcode = HINS_uconv_bl;
+    } else if (prev->get_type()->get_basic_type_kind() == BasicTypeKind::CHAR && n->get_type()->get_basic_type_kind() == BasicTypeKind::LONG) {
+      conv_opcode = HINS_uconv_bq;
+    } else if (prev->get_type()->get_basic_type_kind() == BasicTypeKind::SHORT && n->get_type()->get_basic_type_kind() == BasicTypeKind::INT) {
+      conv_opcode = HINS_uconv_wl;
+    } else if (prev->get_type()->get_basic_type_kind() == BasicTypeKind::SHORT && n->get_type()->get_basic_type_kind() == BasicTypeKind::LONG) {
+      conv_opcode = HINS_uconv_wq;
+    } else if (prev->get_type()->get_basic_type_kind() == BasicTypeKind::INT && n->get_type()->get_basic_type_kind() == BasicTypeKind::LONG) {
+      conv_opcode = HINS_uconv_lq;
+    } 
+  }
+
+  m_hl_iseq->append(new Instruction(conv_opcode, converted, prev->get_operand()));
+  n->set_operand(converted);
 }
 
 
