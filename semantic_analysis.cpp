@@ -676,10 +676,10 @@ void SemanticAnalysis::visit_function_call_expression(Node *n) {
 
     // Check for promotion
     if (left_type->is_integral() && right_type->is_integral() && !left_type->is_same(right_type.get())) {
-      n->set_kid(i, promote_type(n->get_kid(i), left_type->get_basic_type_kind(), left_type->is_signed()));
+      arg_list->set_kid(i, promote_type(parameter, left_type->get_basic_type_kind(), left_type->is_signed()));
     } 
     // Annotate parameter
-    n->get_kid(i)->set_type(left_type);
+    parameter->set_type(left_type);
   }
   // Annotate function call
   n->set_type(fn_type->get_base_type());
