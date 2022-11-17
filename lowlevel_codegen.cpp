@@ -352,6 +352,8 @@ void LowLevelCodeGen::hl_mov_to_ll(Instruction *hl_ins, const std::shared_ptr<In
 
   LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
 
+  std::cerr << "mov size: " << size << std::endl;
+
   Operand src_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
   Operand dest_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
 
@@ -374,6 +376,8 @@ void LowLevelCodeGen::hl_add_to_ll(Instruction *hl_ins, const std::shared_ptr<In
 
   LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
   LowLevelOpcode add_opcode = select_ll_opcode(MINS_ADDB, size);
+
+  std::cerr << "add size: " << size << std::endl;
 
   Operand src_left_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
   Operand src_right_operand = get_ll_operand(hl_ins->get_operand(2), size, ll_iseq);
@@ -468,6 +472,8 @@ void LowLevelCodeGen::hl_cjmp_to_ll_helper(Instruction *hl_ins, const std::share
   // TODO: this should be fine
   //LowLevelOpcode cmp_opcode = select_ll_opcode(MINS_CMPB, size);
   LowLevelOpcode cmp_opcode = MINS_CMPL;
+
+  std::cerr << "cjmp size: " << size << std::endl;
 
   Operand jmp_label = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
   Operand cmp_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
