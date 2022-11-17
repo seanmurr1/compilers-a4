@@ -358,14 +358,14 @@ Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_
   } 
   // TODO: deal with IMM_label?
   
-  Operand::Kind mreg_kind = select_mreg_kind(size);
-  if (op.is_memref())
-    mreg_kind = Operand::MREG64_MEM;
-
   int vreg_num = op.get_base_reg();
 
   // Check for reserved registers
   if (vreg_num < 7) {
+    Operand::Kind mreg_kind = select_mreg_kind(size);
+    if (op.is_memref())
+      mreg_kind = Operand::MREG64_MEM;
+
     switch (vreg_num) {
       case 0: return Operand(mreg_kind, MREG_RAX);
       case 1: return Operand(mreg_kind, MREG_RDI);
@@ -386,6 +386,22 @@ Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_
 
   // TODO: deal with memory references to vregisters...
   // Need to generate instructions for this...
+
+  if (op.is_memref()) {
+    Operand::Kind r11_mreg_kind = select_mreg_kind(8);
+    Operand r11(r11_mreg_kind, MREG_R11);
+
+    ll_iseq->append(new Instruction(MINS_MOVQ, ll_op, r11));
+
+    Operand ref(Operand::MREG64_MEM, MREG_R11);
+    LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
+
+    Operand::Kind mreg_kind = select_mreg_kind(size);
+    Operand r10(rmreg_kind, MREG_R10);
+
+    ll_iseq->append(new Instruction(mov_opcode, ref, r10));
+    ll_op = r10;
+  }
 
   return ll_op;
 }
