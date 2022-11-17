@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "instruction_seq.h"
+#include "lowlevel.h"
 
 // A LowLevelCodeGen object transforms an InstructionSequence containing
 // high-level instructions into an InstructionSequence containing
