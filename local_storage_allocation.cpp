@@ -106,13 +106,15 @@ void LocalStorageAllocation::visit_struct_type_definition(Node *n) {
   return;
 }
 
+// TODO
+void LocalStorageAllocation::visit_function_declaration(Node *n) {
+  return;
+}
+
 /**
  * Visit function parameter.
  **/
 void LocalStorageAllocation::visit_function_parameter(Node *n) {
-  if (n->get_tag() == AST_LITERAL_VALUE) {
-    printf("%s\n", n->get_kid(0)->get_str().c_str());
-  }
   Node *declarator = n->get_kid(1);
   process_declarator(declarator);
 }
