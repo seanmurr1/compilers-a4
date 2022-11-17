@@ -107,8 +107,6 @@ void HighLevelCodegen::visit_function_definition(Node *n) {
 
   // Set max temp vreg info for function node
   n->set_max_temp_vreg(m_max_temp_vreg);
-
-  printf("%d max temp vreg\n", m_max_temp_vreg);
 }
 
 /**
