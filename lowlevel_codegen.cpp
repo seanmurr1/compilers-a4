@@ -357,11 +357,10 @@ long LowLevelCodeGen::get_stack_offset(int vreg_num) {
 
 Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_ptr<InstructionSequence> &ll_iseq) {
   // Check for immediate value, or label
-  if (op.is_imm_ival() || op.is_label()) {
+  if (op.is_imm_ival() || op.is_label() || op.is_imm_label()) {
     return op;
   } 
-  // TODO: deal with IMM_label?
-  
+    
   int vreg_num = op.get_base_reg();
 
   // Check for reserved registers
