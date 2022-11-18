@@ -368,8 +368,8 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
   for (auto i = arg_list->cbegin(); i != arg_list->cend(); i++) {
     Node *arg = *i;
     visit(arg);
-    //Operand arg_op = arg->get_operand();
-    Operand arg_op = arg->get_address_of_operand();
+    Operand arg_op = arg->get_operand();
+    //Operand arg_op = arg->get_address_of_operand();
     // TODO: ADDED
     // if (arg_op.is_memref())
     //   arg_op = Operand(Operand::VREG, arg_op.get_base_reg());
