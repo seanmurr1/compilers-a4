@@ -242,18 +242,10 @@ void HighLevelCodegen::generate_assignment(Node *n) {
 
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_kid(1)->get_type());
 
-  if (n->get_kid(1)->get_type()->is_pointer() && right.is_memref())
+  std::shared_ptr<Type> left_type = n->get_kid(1)->get_type();
+
+  if ((left_type->is_pointer() || left_type->is_array()) && right.is_memref())
     right = Operand(Operand::VREG, right.get_base_reg());
-
-
-
-  // // TODO: ADDED
-  // // If left requires storage, do not dereference right side
-  // if (left.is_memref() && right.is_memref()) {
-  //   left = Operand(Operand::VREG, left.get_base_reg());
-  //   right = Operand(Operand::VREG, right.get_base_reg());
-  // }
-  //   //right = Operand(Operand::VREG, right.get_base_reg());
 
   m_hl_iseq->append(new Instruction(mov_opcode, left, right));
   n->set_operand(left);
