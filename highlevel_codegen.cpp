@@ -246,8 +246,8 @@ void HighLevelCodegen::generate_assignment(Node *n) {
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_kid(1)->get_type());
 
   // // TODO: ADDED
-  if (right.is_memref())
-    right = Operand(Operand::VREG, right.get_base_reg());
+  // if (right.is_memref())
+  //   right = Operand(Operand::VREG, right.get_base_reg());
 
   m_hl_iseq->append(new Instruction(mov_opcode, left, right));
   n->set_operand(left);
