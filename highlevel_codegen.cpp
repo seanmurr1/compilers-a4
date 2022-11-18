@@ -242,7 +242,7 @@ void HighLevelCodegen::generate_assignment(Node *n) {
 
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_kid(1)->get_type());
 
-  if (n->get_kid(1)->get_type()->is_pointer() && n->get_kid(2)->get_symbol()->requires_storage())
+  if (n->get_kid(1)->get_type()->is_pointer() && right.is_memref())
     right = Operand(Operand::VREG, right.get_base_reg());
 
 
