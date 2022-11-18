@@ -452,7 +452,7 @@ void LowLevelCodeGen::hl_mov_to_ll(Instruction *hl_ins, const std::shared_ptr<In
   ll_iseq->append(new Instruction(mov_opcode, src_operand, dest_operand));
 }
 
-// Helper for add/sub translation
+/* Helper for binary operation translation. */
 void LowLevelCodeGen::hl_binary_helper_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode operation) {
   int size = highlevel_opcode_get_source_operand_size(hl_opcode);
 
@@ -497,6 +497,8 @@ void LowLevelCodeGen::hl_mul_to_ll(Instruction *hl_ins, const std::shared_ptr<In
   hl_binary_helper_to_ll(hl_ins, ll_iseq, hl_opcode, mul_opcode);
 }
 
+/* Comparison translations. */
+
 void LowLevelCodeGen::hl_cmplte_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
   hl_cmp_to_ll_helper(hl_ins, ll_iseq, hl_opcode, MINS_SETLE);
 }
@@ -521,6 +523,7 @@ void LowLevelCodeGen::hl_cmpneq_to_ll(Instruction *hl_ins, const std::shared_ptr
   hl_cmp_to_ll_helper(hl_ins, ll_iseq, hl_opcode, MINS_SETNE);
 }
 
+/* Helper function to translate a comparison operation. */
 void LowLevelCodeGen::hl_cmp_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode comparison) {
   int size = highlevel_opcode_get_source_operand_size(hl_opcode);
 
@@ -567,6 +570,8 @@ void LowLevelCodeGen::hl_cmp_to_ll_helper(Instruction *hl_ins, const std::shared
   }
 }
 
+/* Conditional jumps. */
+
 void LowLevelCodeGen::hl_cjmp_t_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
   hl_cjmp_to_ll_helper(hl_ins, ll_iseq, hl_opcode, MINS_JNE);
 }
@@ -575,15 +580,11 @@ void LowLevelCodeGen::hl_cjmp_f_to_ll(Instruction *hl_ins, const std::shared_ptr
   hl_cjmp_to_ll_helper(hl_ins, ll_iseq, hl_opcode, MINS_JE);
 }
 
+/* Helper function to translate conditional jumps. */
 void LowLevelCodeGen::hl_cjmp_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode condition) {
-  //int size = highlevel_opcode_get_source_operand_size(hl_opcode);
-
-  // TODO: this should be fine
-  //LowLevelOpcode cmp_opcode = select_ll_opcode(MINS_CMPB, size);
+  /* NOTE: example code always used 'l' operation ending for conditional jumps... */
   LowLevelOpcode cmp_opcode = MINS_CMPL;
 
-  //Operand jmp_label = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
-  //Operand cmp_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
   // Hardcode 'l' size 
   Operand jmp_label = get_ll_operand(hl_ins->get_operand(1), 4, ll_iseq);
   Operand cmp_operand = get_ll_operand(hl_ins->get_operand(0), 4, ll_iseq);
@@ -592,7 +593,7 @@ void LowLevelCodeGen::hl_cjmp_to_ll_helper(Instruction *hl_ins, const std::share
   ll_iseq->append(new Instruction(condition, jmp_label));
 }
 
-
+/* Helper to translate a conversion operation. */
 void LowLevelCodeGen::hl_conv_to_ll_helper(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, int prev_size, int new_size) {
   LowLevelOpcode prev_mov_opcode = select_ll_opcode(MINS_MOVB, prev_size);
   LowLevelOpcode new_mov_opcode = select_ll_opcode(MINS_MOVB, new_size);
@@ -611,6 +612,7 @@ void LowLevelCodeGen::hl_conv_to_ll_helper(Instruction *hl_ins, const std::share
   ll_iseq->append(new Instruction(new_mov_opcode, new_r10, after_conv_operand));
 }
 
+/* Translate local address operation. */
 void LowLevelCodeGen::hl_localaddr_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
   Operand vreg_op = get_ll_operand(hl_ins->get_operand(0), 8, ll_iseq);
   Operand offset_op = get_ll_operand(hl_ins->get_operand(1), 8, ll_iseq);
@@ -626,6 +628,7 @@ void LowLevelCodeGen::hl_localaddr_to_ll(Instruction *hl_ins, const std::shared_
   ll_iseq->append(new Instruction(MINS_MOVQ, r10, vreg_op));
 }
 
+/* Translate negation operation. */
 void LowLevelCodeGen::hl_neg_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
   int size = highlevel_opcode_get_source_operand_size(hl_opcode);
 
@@ -643,7 +646,8 @@ void LowLevelCodeGen::hl_neg_to_ll(Instruction *hl_ins, const std::shared_ptr<In
   ll_iseq->append(new Instruction(sub_opcode, r10, dest_operand));
 }
 
-void LowLevelCodeGen::hl_div_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+/* Helper to translate div/mod operations. */
+void LowLevelCodeGen::hl_divmod_helper_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, Operand loc) {
   int size = highlevel_opcode_get_source_operand_size(hl_opcode);
 
   LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
@@ -658,55 +662,25 @@ void LowLevelCodeGen::hl_div_to_ll(Instruction *hl_ins, const std::shared_ptr<In
 
   ll_iseq->append(new Instruction(mov_opcode, src_left_operand, rax));
 
-  if (size < 8) {
-    ll_iseq->append(new Instruction(MINS_CDQ));
-  } else {
-    ll_iseq->append(new Instruction(MINS_CQTO));
-  }
+  LowLevelOpcode conv_opcode = (size < 8) ? MINS_CDQ : MINS_CQTO;
+  LowLevelOpcode div_opcode = (size < 8) ? MINS_IDIVL : MINS_IDIVQ;
 
+  ll_iseq->append(new Instruction(conv_opcode));
   ll_iseq->append(new Instruction(mov_opcode, src_right_operand, r10));
-
-  if (size < 8) {
-    ll_iseq->append(new Instruction(MINS_IDIVL, r10));
-  } else {
-    ll_iseq->append(new Instruction(MINS_IDIVQ, r10));
-  }
-
+  ll_iseq->append(new Instruction(div_opcode, r10));
   ll_iseq->append(new Instruction(mov_opcode, rax, dest_operand));
 }
 
-
-void LowLevelCodeGen::hl_mod_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
-  // TODO refactor
-  int size = highlevel_opcode_get_source_operand_size(hl_opcode);
-
-  LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
-
-  Operand src_left_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
-  Operand src_right_operand = get_ll_operand(hl_ins->get_operand(2), size, ll_iseq);
-  Operand dest_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
-
+/* Translate div operation. */
+void LowLevelCodeGen::hl_div_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
   Operand::Kind mreg_kind = select_mreg_kind(size);
   Operand rax(mreg_kind, MREG_RAX);
-  Operand r10(mreg_kind, MREG_R10);
+  hl_divmod_helper_to_ll(hl_ins, ll_iseq, hl_opcode, rax);
+}
 
-  ll_iseq->append(new Instruction(mov_opcode, src_left_operand, rax));
-
-  if (size < 8) {
-    ll_iseq->append(new Instruction(MINS_CDQ));
-  } else {
-    ll_iseq->append(new Instruction(MINS_CQTO));
-  }
-
-  ll_iseq->append(new Instruction(mov_opcode, src_right_operand, r10));
-
-  if (size < 8) {
-    ll_iseq->append(new Instruction(MINS_IDIVL, r10));
-  } else {
-    ll_iseq->append(new Instruction(MINS_IDIVQ, r10));
-  }
-
+/* Translate mod operation. */
+void LowLevelCodeGen::hl_mod_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  Operand::Kind mreg_kind = select_mreg_kind(size);
   Operand rdx(mreg_kind, MREG_RDX);
-
-  ll_iseq->append(new Instruction(mov_opcode, rdx, dest_operand));
+  hl_divmod_helper_to_ll(hl_ins, ll_iseq, hl_opcode, rdx);
 }
