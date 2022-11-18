@@ -69,8 +69,6 @@ private:
   // Unary operations
   void hl_neg_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode);
 
-  // TODO: nop and not
-
 };
 
 

@@ -251,6 +251,12 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
     return;
   }
 
+  // Do nothing instruction
+  if (hl_opcode == HINS_nop) {
+    ll_iseq->append(new Instruction(MINS_NOP));
+    return;
+  }
+
   // jmp instruction
   if (hl_opcode == HINS_jmp) {
     ll_iseq->append(new Instruction(MINS_JMP, hl_ins->get_operand(0)));
@@ -357,6 +363,11 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
   // negation instruction
   if (match_hl(HINS_neg_b, hl_opcode)) {
     hl_neg_to_ll(hl_ins, ll_iseq, hl_opcode);
+    return;
+  }
+  // Logical not
+  if (match_hl(HINS_not_b, hl_opcode)) {
+    // TODO
     return;
   }
 

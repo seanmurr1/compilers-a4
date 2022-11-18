@@ -53,7 +53,6 @@ void HighLevelCodegen::process_parameter(Node *declarator, int register_index) {
       m_hl_iseq->append(new Instruction(mov_opcode, var_op, arg_register));
       return;
   }
-
 }
 
 /**
@@ -244,6 +243,7 @@ void HighLevelCodegen::generate_assignment(Node *n) {
 
   std::shared_ptr<Type> left_type = n->get_kid(1)->get_type();
 
+  // Do not dereference is left side is ptr/array
   if ((left_type->is_pointer() || left_type->is_array()) && right.is_memref())
     right = Operand(Operand::VREG, right.get_base_reg());
 
@@ -310,7 +310,7 @@ void HighLevelCodegen::generate_non_assignment(Node *n, int binary_op) {
 
   opcode = get_opcode(opcode, n->get_kid(1)->get_type());
 
-  // TODO: ADDED THIS CHANGE/FIX
+  // Help resolve mem-references
   if (left.is_memref() && right.is_memref()) {
     HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_kid(1)->get_type());
     
@@ -321,8 +321,8 @@ void HighLevelCodegen::generate_non_assignment(Node *n, int binary_op) {
 
     vreg = next_temp_vreg();
     Operand temp_right_op(Operand::VREG, vreg);
-    m_hl_iseq->append(new Instruction(mov_opcode, temp_right_op, right));
 
+    m_hl_iseq->append(new Instruction(mov_opcode, temp_right_op, right));
     m_hl_iseq->append(new Instruction(opcode, dest, temp_left_op, temp_right_op));
   } else {
     m_hl_iseq->append(new Instruction(opcode, dest, left, right));
@@ -362,12 +362,11 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
     visit(arg);
     Operand arg_op = arg->get_operand();
 
-    // ADDED: 30/31?
+    // Do not dereference is member is ptr/array
     std::shared_ptr<Type> parameter_type = fn_type->get_member(arg_reg_index - 1).get_type();
     if (parameter_type->is_pointer() || parameter_type->is_array())
       arg_op = Operand(Operand::VREG, arg_op.get_base_reg());
 
-    // CHANGING!!!!
     Operand arg_reg = Operand(Operand::VREG, arg_reg_index);
     HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, arg->get_type());
     m_hl_iseq->append(new Instruction(mov_opcode, arg_reg, arg_op));
@@ -435,7 +434,7 @@ void HighLevelCodegen::visit_array_element_ref_expression(Node *n) {
   // Add scaled index to pointer
   Operand arr_base = arr->get_address_of_operand();
 
-  // TODO: ADDED
+  // Make sure array base is not dereferenced
   if (arr_base.is_memref()) 
     arr_base = Operand(Operand::VREG, arr_base.get_base_reg());
 
@@ -490,7 +489,6 @@ void HighLevelCodegen::visit_literal_value(Node *n) {
   if (n->get_kid(0)->get_tag() == TOK_CHAR_LIT) {
     val = LiteralValue::from_char_literal(lexeme, loc);
     ival = val.get_char_value();
-    
   } else {
     val = LiteralValue::from_int_literal(lexeme, loc);
     ival = val.get_int_value();
@@ -598,7 +596,7 @@ void HighLevelCodegen::visit_field_ref_expression(Node *n) {
   // Add offset to struct register
   Operand struct_op = struct_node->get_address_of_operand();
 
-  // TODO: ADDED
+  // Make sure struct base is not dereferenced
   if (struct_op.is_memref()) 
     struct_op = Operand(Operand::VREG, struct_op.get_base_reg());
 
@@ -672,7 +670,6 @@ void HighLevelCodegen::visit_implicit_conversion(Node *n) {
   m_hl_iseq->append(new Instruction(conv_opcode, converted, prev->get_operand()));
   n->set_operand(converted);
 }
-
 
 /**
  * Generates next label in format .L{next_label_num}.
