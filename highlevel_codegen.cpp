@@ -369,10 +369,6 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
     Node *arg = *i;
     visit(arg);
     Operand arg_op = arg->get_operand();
-    //Operand arg_op = arg->get_address_of_operand();
-    // TODO: ADDED
-    // if (arg_op.is_memref())
-    //   arg_op = Operand(Operand::VREG, arg_op.get_base_reg());
 
     // ADDED: 30/31?
     std::shared_ptr<Type> parameter_type = fn_type->get_member(arg_reg_index - 1).get_type();
