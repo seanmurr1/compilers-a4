@@ -698,7 +698,7 @@ void SemanticAnalysis::visit_function_call_expression(Node *n) {
     // Parameter will already be annotated
   }
   // Annotate function call
-  n->set_type(fn_type->get_base_type());
+  n->set_type(fn_type);
 }
 
 /**

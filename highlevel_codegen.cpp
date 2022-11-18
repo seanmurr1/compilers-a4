@@ -372,6 +372,11 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
     // if (arg_op.is_memref())
     //   arg_op = Operand(Operand::VREG, arg_op.get_base_reg());
 
+    // ADDED: 30/31?
+    std::shared_ptr<Type> parameter_type = n->get_type()->get_member(arg_reg_index - 1).get_type();
+    if (parameter_type->is_pointer() || parameter_type->is_array())
+      arg_op = Operand(Operand::VREG, arg_op.get_base_reg());
+
     // CHANGING!!!!
     Operand arg_reg = Operand(Operand::VREG, arg_reg_index);
     HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, arg->get_type());
@@ -384,7 +389,7 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
   m_hl_iseq->append(new Instruction(HINS_call, Operand(Operand::LABEL, fn_name)));
 
   // Annotate node with return value in vr0
-  if (n->get_type()->get_basic_type_kind() == BasicTypeKind::VOID) {
+  if (n->get_base_type()->get_basic_type_kind() == BasicTypeKind::VOID) {
     return;
   }
 
