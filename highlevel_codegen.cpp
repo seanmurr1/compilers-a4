@@ -238,16 +238,14 @@ void HighLevelCodegen::visit_if_else_statement(Node *n) {
  **/
 void HighLevelCodegen::generate_assignment(Node *n) {
   Operand left = n->get_kid(1)->get_operand();
-
-  // TODO added
-  //Operand right = n->get_kid(2)->get_operand();
-  Operand right = n->get_kid(2)->get_address_of_operand();
+  Operand right = n->get_kid(2)->get_operand();
 
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_kid(1)->get_type());
 
-  // // TODO: ADDED
-  // if (right.is_memref())
-  //   right = Operand(Operand::VREG, right.get_base_reg());
+  // TODO: ADDED
+  // If left requires storage, do not dereference right side
+  if (n->get_kid(1)->get_symbol()->requires_storage())
+    right = Operand(Operand::VREG, right.get_base_reg())
 
   m_hl_iseq->append(new Instruction(mov_opcode, left, right));
   n->set_operand(left);
