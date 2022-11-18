@@ -474,6 +474,7 @@ void LowLevelCodeGen::hl_binary_helper_to_ll(Instruction *hl_ins, const std::sha
  * Translates HL add instruction to LL.
  **/
 void LowLevelCodeGen::hl_add_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  int size = highlevel_opcode_get_source_operand_size(hl_opcode);
   LowLevelOpcode add_opcode = select_ll_opcode(MINS_ADDB, size);
   hl_binary_helper_to_ll(hl_ins, ll_iseq, hl_opcode, add_opcode);
 }
@@ -482,6 +483,7 @@ void LowLevelCodeGen::hl_add_to_ll(Instruction *hl_ins, const std::shared_ptr<In
  * Translates HL sub instruction to LL.
  **/
 void LowLevelCodeGen::hl_sub_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  int size = highlevel_opcode_get_source_operand_size(hl_opcode);
   LowLevelOpcode sub_opcode = select_ll_opcode(MINS_SUBB, size);
   hl_binary_helper_to_ll(hl_ins, ll_iseq, hl_opcode, sub_opcode);
 }
