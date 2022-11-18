@@ -238,7 +238,10 @@ void HighLevelCodegen::visit_if_else_statement(Node *n) {
  **/
 void HighLevelCodegen::generate_assignment(Node *n) {
   Operand left = n->get_kid(1)->get_operand();
-  Operand right = n->get_kid(2)->get_operand();
+
+  // TODO added
+  //Operand right = n->get_kid(2)->get_operand();
+  Operand right = n->get_kid(2)->get_address_of_operand();
 
   HighLevelOpcode mov_opcode = get_opcode(HINS_mov_b, n->get_kid(1)->get_type());
 
