@@ -677,7 +677,8 @@ void SemanticAnalysis::visit_cast_expression(Node *n) {}
 void SemanticAnalysis::visit_function_call_expression(Node *n) {
   const std::string &fn_name = n->get_kid(0)->get_kid(0)->get_str();
   Node *arg_list = n->get_kid(1);
-  std::shared_ptr<Type> fn_type = m_cur_symtab->lookup_recursive(fn_name)->get_type();
+  std::shared_ptr<Symbol> fn_sym = m_cur_symtab->lookup_recursive(fn_name);
+  std::shared_ptr<Type> fn_type = fn_sym->get_type();
 
   // Check for matching number of parameters
   if (fn_type->get_num_members() != arg_list->get_num_kids()) SemanticError::raise(n->get_loc(), "Bad number of parameters for function call");
@@ -698,7 +699,8 @@ void SemanticAnalysis::visit_function_call_expression(Node *n) {
     // Parameter will already be annotated
   }
   // Annotate function call
-  n->set_type(fn_type);
+  n->set_type(fn_type->get_base_type());
+  n->set_symbol(fn_sym);
 }
 
 /**

@@ -360,6 +360,8 @@ void HighLevelCodegen::visit_binary_expression(Node *n) {
  * Places fn arguments in argument registers and calls function.
  **/
 void HighLevelCodegen::visit_function_call_expression(Node *n) {
+  std::shared_ptr<Type> fn_type = n->get_symbol()->get_type();
+
   // Place arguments in argument registers
   Node *arg_list = n->get_kid(1);
   int arg_reg_index = 1;
@@ -373,7 +375,7 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
     //   arg_op = Operand(Operand::VREG, arg_op.get_base_reg());
 
     // ADDED: 30/31?
-    std::shared_ptr<Type> parameter_type = n->get_type()->get_member(arg_reg_index - 1).get_type();
+    std::shared_ptr<Type> parameter_type = fn_type->get_member(arg_reg_index - 1).get_type();
     if (parameter_type->is_pointer() || parameter_type->is_array())
       arg_op = Operand(Operand::VREG, arg_op.get_base_reg());
 
@@ -389,7 +391,7 @@ void HighLevelCodegen::visit_function_call_expression(Node *n) {
   m_hl_iseq->append(new Instruction(HINS_call, Operand(Operand::LABEL, fn_name)));
 
   // Annotate node with return value in vr0
-  if (n->get_type()->get_base_type()->get_basic_type_kind() == BasicTypeKind::VOID) {
+  if (fn_type->get_base_type()->get_basic_type_kind() == BasicTypeKind::VOID) {
     return;
   }
 
