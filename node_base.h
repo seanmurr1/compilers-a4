@@ -40,6 +40,9 @@ private:
   // Operand associated with node
   Operand m_op;
 
+  // TODO
+  std::shared_ptr<Type> m_fn_type;
+
   int m_max_temp_vreg;
 
   // copy ctor and assignment operator not supported
@@ -62,6 +65,10 @@ public:
 
   void set_max_temp_vreg(int vreg) { m_max_temp_vreg = vreg; }
   int get_max_temp_vreg() const { return m_max_temp_vreg; }
+
+  void set_fn_type(const std::shared_ptr<Type> &type) { m_fn_type = type; }
+  std::shared_ptr<Type> get_fn_type() const { return m_fn_type; }
+
 };
 
 #endif // NODE_BASE_H

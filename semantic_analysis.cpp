@@ -700,7 +700,7 @@ void SemanticAnalysis::visit_function_call_expression(Node *n) {
   }
   // Annotate function call
   n->set_type(fn_type->get_base_type());
-  n->set_symbol(fn_sym);
+  n->set_fn_type(fn_type);
 }
 
 /**

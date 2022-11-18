@@ -360,7 +360,7 @@ void HighLevelCodegen::visit_binary_expression(Node *n) {
  * Places fn arguments in argument registers and calls function.
  **/
 void HighLevelCodegen::visit_function_call_expression(Node *n) {
-  std::shared_ptr<Type> fn_type = n->get_symbol()->get_type();
+  std::shared_ptr<Type> fn_type = n->get_fn_type();
 
   // Place arguments in argument registers
   Node *arg_list = n->get_kid(1);
