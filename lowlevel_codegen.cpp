@@ -673,6 +673,7 @@ void LowLevelCodeGen::hl_divmod_helper_to_ll(Instruction *hl_ins, const std::sha
 
 /* Translate div operation. */
 void LowLevelCodeGen::hl_div_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  int size = highlevel_opcode_get_source_operand_size(hl_opcode);
   Operand::Kind mreg_kind = select_mreg_kind(size);
   Operand rax(mreg_kind, MREG_RAX);
   hl_divmod_helper_to_ll(hl_ins, ll_iseq, hl_opcode, rax);
@@ -680,6 +681,7 @@ void LowLevelCodeGen::hl_div_to_ll(Instruction *hl_ins, const std::shared_ptr<In
 
 /* Translate mod operation. */
 void LowLevelCodeGen::hl_mod_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
+  int size = highlevel_opcode_get_source_operand_size(hl_opcode);
   Operand::Kind mreg_kind = select_mreg_kind(size);
   Operand rdx(mreg_kind, MREG_RDX);
   hl_divmod_helper_to_ll(hl_ins, ll_iseq, hl_opcode, rdx);
