@@ -106,7 +106,7 @@ void LocalStorageAllocation::visit_struct_type_definition(Node *n) {
   return;
 }
 
-// TODO
+// Don't allocate for function declarations.
 void LocalStorageAllocation::visit_function_declaration(Node *n) {
   return;
 }

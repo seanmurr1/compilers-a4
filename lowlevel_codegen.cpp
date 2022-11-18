@@ -9,9 +9,6 @@
 #include "exceptions.h"
 #include "lowlevel_codegen.h"
 
-// TODO REMOVE
-#include <iostream>
-
 namespace {
 
 // This map has some "obvious" translations of high-level opcodes to
@@ -114,8 +111,10 @@ std::shared_ptr<InstructionSequence> LowLevelCodeGen::translate_hl_to_ll(const s
   // optimization passes.
   ll_iseq->set_funcdef_ast(funcdef_ast);
 
+  // Function name
   const std::string &fn_name = funcdef_ast->get_kid(1)->get_str();
 
+  // Get offset in stack for memory variables (multiple of 8)
   m_memory_variable_offset = funcdef_ast->get_symbol()->get_offset();
   if (m_memory_variable_offset % 8 != 0)
     m_memory_variable_offset += (8 - (m_memory_variable_offset % 8));
@@ -123,6 +122,7 @@ std::shared_ptr<InstructionSequence> LowLevelCodeGen::translate_hl_to_ll(const s
   if (m_memory_variable_offset != 0)
     printf("/* Function \'%s\': placing memory variables at offset -%d from %%rbp */\n", fn_name.c_str(), m_memory_variable_offset);
 
+  // Get offset in stack for virtual registers
   int max_temp_vreg = funcdef_ast->get_max_temp_vreg();
   int total_vreg_memory = (max_temp_vreg - 9) * 8;
   printf("/* Function \'%s\': uses %d total bytes of memory storage for vregs */\n", fn_name.c_str(), total_vreg_memory);
@@ -251,14 +251,6 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
     return;
   }
 
-  // TODO: handle other high-level instructions
-  // Note that you can use the highlevel_opcode_get_source_operand_size() and
-  // highlevel_opcode_get_dest_operand_size() functions to determine the
-  // size (in bytes, 1, 2, 4, or 8) of either the source operands or
-  // destination operand of a high-level instruction. This should be useful
-  // for choosing the appropriate low-level instructions and
-  // machine register operands.
-
   // jmp instruction
   if (hl_opcode == HINS_jmp) {
     ll_iseq->append(new Instruction(MINS_JMP, hl_ins->get_operand(0)));
@@ -271,7 +263,7 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
     return;
   }
 
-  // Comparisons
+  /* Comparisons. */
   if (match_hl(HINS_cmplte_b, hl_opcode)) {
     hl_cmplte_to_ll(hl_ins, ll_iseq, hl_opcode);
     return;
@@ -292,7 +284,7 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
     return;
   }
 
-  // Conditional jumps
+  /* Conditional jumps. */
   if (hl_opcode == HINS_cjmp_t) {
     hl_cjmp_t_to_ll(hl_ins, ll_iseq, hl_opcode);
     return;
@@ -301,7 +293,7 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
     return;
   }
 
-  // Conversions
+  /* Conversions. */
   if (hl_opcode == HINS_sconv_bw || hl_opcode == HINS_uconv_bw) {
     hl_conv_to_ll_helper(hl_ins, ll_iseq, hl_opcode, 1, 2);
     return;
@@ -322,6 +314,7 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
     return;
   }
   
+  // local address instruction
   if (hl_opcode == HINS_localaddr) {
     hl_localaddr_to_ll(hl_ins, ll_iseq, hl_opcode);
     return;
@@ -333,6 +326,7 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
     return;
   }
 
+  /* Binary operations. */
   // add instruction
   if (match_hl(HINS_add_b, hl_opcode)) {
     hl_add_to_ll(hl_ins, ll_iseq, hl_opcode);
@@ -359,8 +353,7 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
     return;
   }
 
-  /* Unary. */
-
+  /* Unary Operations. */
   // negation instruction
   if (match_hl(HINS_neg_b, hl_opcode)) {
     hl_neg_to_ll(hl_ins, ll_iseq, hl_opcode);
@@ -370,16 +363,16 @@ void LowLevelCodeGen::translate_instruction(Instruction *hl_ins, const std::shar
   RuntimeError::raise("high level opcode %d not handled", int(hl_opcode));
 }
 
-// TODO: implement other private member functions
-
+/* Get stack offset for a given virtual register. */
 long LowLevelCodeGen::get_stack_offset(int vreg_num) {
   int base_vreg_num = vreg_num - 10;
   int offset = m_vreg_storage_offset - (base_vreg_num * 8);
   return -1 * offset;
 }
 
+/* Get low-level operand equivalent of a high-level operand. */
 Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_ptr<InstructionSequence> &ll_iseq) {
-  // Check for immediate value, or label
+  // Check for immediate value, or label, or immeidate label
   if (op.is_imm_ival() || op.is_label() || op.is_imm_label()) {
     return op;
   } 
@@ -406,16 +399,14 @@ Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_
     }
   }
 
-  // Deal with VREG
+  // Case: non-reserved virtual register
+  // Get stack offset
   int vreg_offset = get_stack_offset(vreg_num);
   Operand ll_op(Operand::MREG64_MEM_OFF, MREG_RBP, vreg_offset);
 
-  // TODO: deal with memory references to vregisters...
-  // Need to generate instructions for this...
-
+  // Check if vreg is a memory reference
   if (op.is_memref()) {
-    // TODO: This is wrong
-
+    // Get helper register
     MachineReg reg;
     if (m_r11_in_use && m_r10_in_use) {
       assert(false);
@@ -430,10 +421,8 @@ Operand LowLevelCodeGen::get_ll_operand(Operand op, int size, const std::shared_
     Operand::Kind mreg_kind = select_mreg_kind(8);
     Operand reg_op(mreg_kind, reg);
 
-    // TODO: make MOV relate to size parameter... or not??
-    // TODO, track use of r11 and r10...
+    // Move into helper register
     ll_iseq->append(new Instruction(MINS_MOVQ, ll_op, reg_op));
-
     Operand ref(Operand::MREG64_MEM, reg);
     return ref;
   }
@@ -475,9 +464,6 @@ void LowLevelCodeGen::hl_add_to_ll(Instruction *hl_ins, const std::shared_ptr<In
   Operand src_left_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
   Operand src_right_operand = get_ll_operand(hl_ins->get_operand(2), size, ll_iseq);
   Operand dest_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
-
-  // TODO: deal with moving into temp register if two or more are mem refs?????
-  // I dont think this is necessary with the use of r10 as a helper here...
 
   Operand::Kind mreg_kind = select_mreg_kind(size);
   Operand r10(mreg_kind, MREG_R10);

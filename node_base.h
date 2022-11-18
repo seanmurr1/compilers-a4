@@ -40,7 +40,7 @@ private:
   // Operand associated with node
   Operand m_op;
 
-  // TODO
+  // Function type (only used for function call nodes)
   std::shared_ptr<Type> m_fn_type;
 
   int m_max_temp_vreg;

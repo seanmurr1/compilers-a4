@@ -127,6 +127,7 @@ void Context::analyze() {
   m_sema.visit(m_ast);
 }
 
+// Collect all string constants
 void Context::collect_ast_string_constants(Node *n, ModuleCollector *module_collector) {
   int tag = n->get_tag();
   if (tag == TOK_STR_LIT) {
@@ -158,9 +159,7 @@ void Context::highlevel_codegen(ModuleCollector *module_collector) {
   LocalStorageAllocation local_storage_alloc;
   local_storage_alloc.visit(m_ast);
 
-  // TODO: find all of the string constants in the AST
-  //       and call the ModuleCollector's collect_string_constant
-  //       member function for each one
+  // find all of the string constants in the AST
   collect_ast_string_constants(m_ast, module_collector);
 
   // collect all of the global variables
