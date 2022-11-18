@@ -668,7 +668,7 @@ void LowLevelCodeGen::hl_divmod_helper_to_ll(Instruction *hl_ins, const std::sha
   ll_iseq->append(new Instruction(conv_opcode));
   ll_iseq->append(new Instruction(mov_opcode, src_right_operand, r10));
   ll_iseq->append(new Instruction(div_opcode, r10));
-  ll_iseq->append(new Instruction(mov_opcode, rax, dest_operand));
+  ll_iseq->append(new Instruction(mov_opcode, loc, dest_operand));
 }
 
 /* Translate div operation. */
