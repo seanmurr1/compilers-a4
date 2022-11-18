@@ -244,8 +244,11 @@ void HighLevelCodegen::generate_assignment(Node *n) {
 
   // TODO: ADDED
   // If left requires storage, do not dereference right side
-  if (n->get_kid(1)->get_symbol()->requires_storage())
+  if (left.is_memref() && right.is_memref()) {
+    left = Operand(Operand::VREG, left.get_base_reg());
     right = Operand(Operand::VREG, right.get_base_reg());
+  }
+    //right = Operand(Operand::VREG, right.get_base_reg());
 
   m_hl_iseq->append(new Instruction(mov_opcode, left, right));
   n->set_operand(left);
