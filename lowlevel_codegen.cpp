@@ -453,11 +453,10 @@ void LowLevelCodeGen::hl_mov_to_ll(Instruction *hl_ins, const std::shared_ptr<In
 }
 
 // Helper for add/sub translation
-void LowLevelCodeGen::hl_add_sub_helper_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode operation) {
+void LowLevelCodeGen::hl_binary_helper_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode, LowLevelOpcode operation) {
   int size = highlevel_opcode_get_source_operand_size(hl_opcode);
 
   LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
-  LowLevelOpcode binary_opcode = select_ll_opcode(operation, size);
 
   Operand src_left_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
   Operand src_right_operand = get_ll_operand(hl_ins->get_operand(2), size, ll_iseq);
@@ -467,7 +466,7 @@ void LowLevelCodeGen::hl_add_sub_helper_to_ll(Instruction *hl_ins, const std::sh
   Operand r10(mreg_kind, MREG_R10);
 
   ll_iseq->append(new Instruction(mov_opcode, src_left_operand, r10));
-  ll_iseq->append(new Instruction(binary_opcode, src_right_operand, r10));
+  ll_iseq->append(new Instruction(operation, src_right_operand, r10));
   ll_iseq->append(new Instruction(mov_opcode, r10, dest_operand));
 }
 
@@ -475,14 +474,16 @@ void LowLevelCodeGen::hl_add_sub_helper_to_ll(Instruction *hl_ins, const std::sh
  * Translates HL add instruction to LL.
  **/
 void LowLevelCodeGen::hl_add_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
-  hl_add_sub_helper_to_ll(hl_ins, ll_iseq, hl_opcode, MINS_ADDB);
+  LowLevelOpcode add_opcode = select_ll_opcode(MINS_ADDB, size);
+  hl_binary_helper_to_ll(hl_ins, ll_iseq, hl_opcode, add_opcode);
 }
 
 /**
  * Translates HL sub instruction to LL.
  **/
 void LowLevelCodeGen::hl_sub_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
-  hl_add_sub_helper_to_ll(hl_ins, ll_iseq, hl_opcode, MINS_SUBB);
+  LowLevelOpcode sub_opcode = select_ll_opcode(MINS_SUBB, size);
+  hl_binary_helper_to_ll(hl_ins, ll_iseq, hl_opcode, sub_opcode);
 }
 
 /**
@@ -490,26 +491,8 @@ void LowLevelCodeGen::hl_sub_to_ll(Instruction *hl_ins, const std::shared_ptr<In
  **/
 void LowLevelCodeGen::hl_mul_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
   int size = highlevel_opcode_get_source_operand_size(hl_opcode);
-
-  LowLevelOpcode mov_opcode = select_ll_opcode(MINS_MOVB, size);
-  LowLevelOpcode mul_opcode;
-
-  if (size == 8) {
-    mul_opcode = MINS_IMULQ;
-  } else {
-    mul_opcode = MINS_IMULL;
-  }
-
-  Operand src_left_operand = get_ll_operand(hl_ins->get_operand(1), size, ll_iseq);
-  Operand src_right_operand = get_ll_operand(hl_ins->get_operand(2), size, ll_iseq);
-  Operand dest_operand = get_ll_operand(hl_ins->get_operand(0), size, ll_iseq);
-
-  Operand::Kind mreg_kind = select_mreg_kind(size);
-  Operand r10(mreg_kind, MREG_R10);
-
-  ll_iseq->append(new Instruction(mov_opcode, src_left_operand, r10));
-  ll_iseq->append(new Instruction(mul_opcode, src_right_operand, r10));
-  ll_iseq->append(new Instruction(mov_opcode, r10, dest_operand));
+  LowLevelOpcode mul_opcode = (size == 8) ? MINS_IMULQ : MINS_IMULL;
+  hl_binary_helper_to_ll(hl_ins, ll_iseq, hl_opcode, mul_opcode);
 }
 
 void LowLevelCodeGen::hl_cmplte_to_ll(Instruction *hl_ins, const std::shared_ptr<InstructionSequence> &ll_iseq, HighLevelOpcode hl_opcode) {
